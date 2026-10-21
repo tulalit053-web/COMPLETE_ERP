@@ -1,0 +1,55 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.Regional;
+import com.erp.system.service.RegionalService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/regionals")
+public class RegionalController {
+
+    @Autowired
+    private RegionalService regionalService;
+
+    @GetMapping
+    public List<Regional> getAllRegionals() {
+        return regionalService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Regional> getRegionalById(@PathVariable Integer id) {
+        return regionalService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/company/{companyId}")
+    public List<Regional> getRegionalsByCompanyId(@PathVariable Integer companyId) {
+        return regionalService.findByCompanyId(companyId);
+    }
+
+    @PostMapping
+    public Regional createRegional(@RequestBody Regional regional) {
+        return regionalService.save(regional);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Regional> updateRegional(@PathVariable Integer id, @RequestBody Regional regionalDetails) {
+        try {
+            Regional updatedRegional = regionalService.update(id, regionalDetails);
+            return ResponseEntity.ok(updatedRegional);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRegional(@PathVariable Integer id) {
+        regionalService.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+}

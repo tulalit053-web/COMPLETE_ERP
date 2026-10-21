@@ -1,0 +1,55 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.UserMenu;
+import com.erp.system.service.UserMenuService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/user-menus")
+public class UserMenuController {
+
+    @Autowired
+    private UserMenuService userMenuService;
+
+    @GetMapping
+    public List<UserMenu> getAllUserMenus() {
+        return userMenuService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserMenu> getUserMenuById(@PathVariable Integer id) {
+        return userMenuService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/user/{userId}")
+    public List<UserMenu> getUserMenusByUserId(@PathVariable Integer userId) {
+        return userMenuService.findByUserId(userId);
+    }
+
+    @PostMapping
+    public UserMenu createUserMenu(@RequestBody UserMenu userMenu) {
+        return userMenuService.save(userMenu);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserMenu> updateUserMenu(@PathVariable Integer id, @RequestBody UserMenu userMenuDetails) {
+        try {
+            UserMenu updatedUserMenu = userMenuService.update(id, userMenuDetails);
+            return ResponseEntity.ok(updatedUserMenu);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserMenu(@PathVariable Integer id) {
+        userMenuService.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+}

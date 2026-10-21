@@ -1,0 +1,49 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.Branch;
+import com.erp.system.repository.BranchRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class BranchService {
+
+    @Autowired
+    private BranchRepository branchRepository;
+
+    public List<Branch> findAll() {
+        return branchRepository.findAll();
+    }
+
+    public Optional<Branch> findById(Integer id) {
+        return branchRepository.findById(id);
+    }
+    
+    public List<Branch> findByRegionalId(Integer regionalId) {
+        return branchRepository.findByRegionalId(regionalId);
+    }
+
+    public Branch save(Branch branch) {
+        return branchRepository.save(branch);
+    }
+
+    public Branch update(Integer id, Branch branchDetails) {
+        return branchRepository.findById(id).map(branch -> {
+            branch.setRegionalId(branchDetails.getRegionalId());
+            branch.setBranchCode(branchDetails.getBranchCode());
+            branch.setBranchName(branchDetails.getBranchName());
+            branch.setIsActive(branchDetails.getIsActive());
+            branch.setModifiedBy(branchDetails.getModifiedBy());
+            return branchRepository.save(branch);
+        }).orElseThrow(() -> new RuntimeException("Branch not found with id " + id));
+    }
+
+    public void deleteById(Integer id) {
+        branchRepository.deleteById(id);
+    }
+}

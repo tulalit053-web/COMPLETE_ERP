@@ -1,0 +1,13 @@
+package com.erp.system.repository;
+
+import com.erp.system.entity.UserApplicationDevice;
+import com.erp.system.entity.UserApplicationDeviceId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface UserApplicationDeviceRepository extends JpaRepository<UserApplicationDevice, UserApplicationDeviceId> {
+    List<UserApplicationDevice> findByIdUserId(Integer userId);
+}

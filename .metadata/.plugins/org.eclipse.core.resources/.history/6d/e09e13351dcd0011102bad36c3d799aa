@@ -1,0 +1,26 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.LogAudit;
+import com.erp.system.service.LogAuditService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/audit-logs")
+public class LogAuditController {
+    @Autowired
+    private LogAuditService logAuditService;
+
+    @GetMapping
+    public List<LogAudit> getAllLogAudits() { return logAuditService.findAll(); }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<LogAudit> getLogAuditById(@PathVariable Long id) {
+        return logAuditService.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public LogAudit createLogAudit(@RequestBody LogAudit logAudit) { return logAuditService.save(logAudit); }
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;erp-config-server/src/main/resources/config/erp-admin-service.yml&apos; to &apos;erp-admins-service.yml&apos;" description="Rename resource &apos;erp-admin-service.yml&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/main/resources/config/erp-admin-service.yml" name="erp-admins-service.yml" stamp="1775717027429" updateReferences="true"/>
+</session>

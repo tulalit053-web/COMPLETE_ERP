@@ -1,0 +1,26 @@
+package com.erp.system.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "dge_mst_user_application_device", schema = "schema_admin")
+public class UserApplicationDevice {
+
+    @EmbeddedId
+    private UserApplicationDeviceId id;
+
+    @Column(name = "dmuad_created_datetime", updatable = false)
+    private LocalDateTime createdDatetime;
+
+    @Column(name = "dmuad_valid_date", nullable = false)
+    private LocalDate validDate;
+
+    @PrePersist
+    protected void onCreate() {
+        createdDatetime = LocalDateTime.now();
+    }
+}

@@ -1,0 +1,115 @@
+package com.erp.system.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "adm_mst_application", schema = "schema_admin")
+public class Application {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "dmap_id")
+    private Integer id;
+
+    @Column(name = "dmap_application_code", nullable = false, unique = true, length = 50)
+    private String applicationCode;
+
+    @Column(name = "dmap_application_name", nullable = false, length = 100)
+    private String applicationName;
+
+    @Column(name = "dmap_description", length = 300)
+    private String description;
+
+    @Column(name = "dmap_is_active")
+    private Boolean isActive = true;
+
+    @Column(name = "dmap_created_datetime")
+    private LocalDateTime createdDatetime;
+
+    @Column(name = "dmap_created_by", length = 50)
+    private String createdBy;
+
+    @Column(name = "dmap_modified_datetime")
+    private LocalDateTime modifiedDatetime;
+
+    @Column(name = "dmap_modified_by", length = 50)
+    private String modifiedBy;
+
+    // ===== Constructor =====
+    public Application() {
+    }
+
+    // ===== Getter & Setter =====
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getApplicationCode() {
+        return applicationCode;
+    }
+
+    public void setApplicationCode(String applicationCode) {
+        this.applicationCode = applicationCode;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public LocalDateTime getCreatedDatetime() {
+        return createdDatetime;
+    }
+
+    public void setCreatedDatetime(LocalDateTime createdDatetime) {
+        this.createdDatetime = createdDatetime;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getModifiedDatetime() {
+        return modifiedDatetime;
+    }
+
+    public void setModifiedDatetime(LocalDateTime modifiedDatetime) {
+        this.modifiedDatetime = modifiedDatetime;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+}

@@ -1,0 +1,5 @@
+package com.erp.system.entity;
+
+public class UserApplication {
+
+}
