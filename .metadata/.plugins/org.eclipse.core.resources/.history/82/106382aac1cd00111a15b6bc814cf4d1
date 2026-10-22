@@ -1,0 +1,93 @@
+package com.erp.system.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "adm_mst_user_application", schema = "schema_admin")
+public class UserApplication {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "dmuapp_id")
+    private Integer id;
+
+    @Column(name = "dmuapp_role_id")
+    private Integer roleId;
+
+    @Column(name = "dmuapp_employee_code", nullable = false, length = 50)
+    private String employeeCode;
+
+    @Column(name = "dmuapp_name", nullable = false, length = 250)
+    private String name;
+
+    @Column(name = "dmuapp_username", nullable = false, length = 250, unique = true)
+    private String username;
+
+    @Column(name = "dmuapp_email", length = 250)
+    private String email;
+
+    @Column(name = "dmuapp_mobilephone", length = 21)
+    private String mobilephone;
+
+    @Column(name = "dmuapp_is_active")
+    private BigDecimal isActive;
+
+    @Column(name = "dmuapp_is_login")
+    private BigDecimal isLogin;
+
+    @Column(name = "dmuapp_login_date")
+    private LocalDateTime loginDate;
+
+    @Column(name = "dmuapp_logout_date")
+    private LocalDateTime logoutDate;
+
+    @Column(name = "dmuapp_created_datetime", updatable = false)
+    private LocalDateTime createdDatetime;
+
+    @Column(name = "dmuapp_created_by", length = 100)
+    private String createdBy;
+
+    @Column(name = "dmuapp_modified_datetime")
+    private LocalDateTime modifiedDatetime;
+
+    @Column(name = "dmuapp_modified_by", length = 100)
+    private String modifiedBy;
+
+    @Column(name = "dmuapp_company", length = 50)
+    private String company;
+
+    @Column(name = "dmuapp_currency", length = 50)
+    private String currency;
+
+    @Column(name = "dmuapp_regional", length = 50)
+    private String regional;
+
+    @Column(name = "dmuapp_branch", length = 50)
+    private String branch;
+
+    @Column(name = "dmuapp_subbranch", length = 50)
+    private String subbranch;
+
+    @Column(name = "dmuapp_password", length = 300)
+    private String password;
+
+    @Column(name = "dmuapp_last_change_pwd")
+    private LocalDateTime lastChangePwd;
+
+    @Column(name = "dmuapp_must_change_pwd")
+    private Boolean mustChangePwd;
+
+    @PrePersist
+    protected void onCreate() {
+        createdDatetime = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        modifiedDatetime = LocalDateTime.now();
+    }
+}

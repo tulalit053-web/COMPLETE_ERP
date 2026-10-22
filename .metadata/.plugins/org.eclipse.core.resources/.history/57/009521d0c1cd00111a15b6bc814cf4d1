@@ -1,0 +1,58 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.UserApplication;
+import com.erp.system.repository.UserApplicationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class UserApplicationService {
+
+    @Autowired
+    private UserApplicationRepository userApplicationRepository;
+
+    public List<UserApplication> findAll() {
+        return userApplicationRepository.findAll();
+    }
+
+    public Optional<UserApplication> findById(Integer id) {
+        return userApplicationRepository.findById(id);
+    }
+    
+    public Optional<UserApplication> findByUsername(String username) {
+        return userApplicationRepository.findByUsername(username);
+    }
+
+    public UserApplication save(UserApplication user) {
+        // Todo: Add password encoding logic here before saving in production
+        return userApplicationRepository.save(user);
+    }
+
+    public UserApplication update(Integer id, UserApplication userDetails) {
+        return userApplicationRepository.findById(id).map(user -> {
+            user.setRoleId(userDetails.getRoleId());
+            user.setEmployeeCode(userDetails.getEmployeeCode());
+            user.setName(userDetails.getName());
+            user.setEmail(userDetails.getEmail());
+            user.setMobilephone(userDetails.getMobilephone());
+            user.setIsActive(userDetails.getIsActive());
+            user.setCompany(userDetails.getCompany());
+            user.setCurrency(userDetails.getCurrency());
+            user.setRegional(userDetails.getRegional());
+            user.setBranch(userDetails.getBranch());
+            user.setSubbranch(userDetails.getSubbranch());
+            user.setModifiedBy(userDetails.getModifiedBy());
+            return userApplicationRepository.save(user);
+        }).orElseThrow(() -> new RuntimeException("User Application not found with id " + id));
+    }
+
+    public void deleteById(Integer id) {
+        userApplicationRepository.deleteById(id);
+    }
+}

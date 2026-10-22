@@ -1,0 +1,49 @@
+server:
+  port: 8084
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # Admin Service
+        - id: erp-admins-service
+          uri: lb://erp-admins-service
+          predicates:
+            - Path=/api/admins/**
+          filters:
+            - StripPrefix=2          # ← ubah jadi 2
+
+        # CRM Service
+        - id: erp-crm-service
+          uri: lb://erp-crm-service
+          predicates:
+            - Path=/api/crm/**
+          filters:
+            - StripPrefix=2
+
+        # HRD Service
+        - id: erp-hrd-service
+          uri: lb://erp-hrd-service
+          predicates:
+            - Path=/api/hrd/**
+          filters:
+            - StripPrefix=2
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: erp-gateway
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

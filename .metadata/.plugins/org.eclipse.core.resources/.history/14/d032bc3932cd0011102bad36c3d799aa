@@ -1,0 +1,6 @@
+server:
+  port: 8881
+
+eureka:
+  instance:
+    hostname: erp-admins

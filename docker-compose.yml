@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: erp-keycloak
+    command: start-dev
+    environment:
+      # Konfigurasi Database PostgreSQL
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://host.docker.internal:5432/erp_microservices?currentSchema=schema_keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: d0d0l
+      
+      # Akun Administrator Awal
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080" # Menggunakan port 8180 agar tidak bentrok dengan Spring Boot (8080)

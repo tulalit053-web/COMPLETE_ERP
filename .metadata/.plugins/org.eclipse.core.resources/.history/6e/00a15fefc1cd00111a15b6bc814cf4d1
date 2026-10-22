@@ -1,0 +1,10 @@
+package com.erp.system.repository;
+
+import com.erp.system.entity.UserApplication;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserApplicationRepository extends JpaRepository<UserApplication, Integer> {
+    boolean existsByUsername(String username);
+}

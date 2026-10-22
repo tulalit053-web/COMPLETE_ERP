@@ -1,0 +1,53 @@
+package com.erp.system.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "adm_mst_user_application", schema = "schema_admin")
+public class UserApplication {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "dmuapp_id")
+    private Integer id;
+
+    @Column(name = "dmuapp_employee_code", nullable = false, length = 50)
+    private String employeeCode;
+
+    @Column(name = "dmuapp_name", nullable = false, length = 250)
+    private String name;
+
+    @Column(name = "dmuapp_username", nullable = false, unique = true, length = 250)
+    private String username;
+
+    @Column(name = "dmuapp_email", length = 250)
+    private String email;
+
+    @Column(name = "dmuapp_mobilephone", length = 21)
+    private String mobilephone;
+
+    @Column(name = "dmuapp_company", length = 50)
+    private String company;
+
+    @Column(name = "dmuapp_branch", length = 50)
+    private String branch;
+
+    // Field ini kita mapping, tapi di Service akan dikosongkan sebelum masuk DB
+    @Column(name = "dmuapp_password", length = 300)
+    private String password; 
+
+    @Column(name = "dmuapp_is_active")
+    private BigDecimal isActive = BigDecimal.ONE;
+
+    @Column(name = "dmuapp_created_datetime", updatable = false)
+    private LocalDateTime createdDatetime;
+
+    @PrePersist
+    protected void onCreate() {
+        createdDatetime = LocalDateTime.now();
+    }
+}
