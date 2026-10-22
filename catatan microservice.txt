@@ -1,1 +1,7 @@
 keycloak - http://localhost:8180 - admin/admin pakai docker 
+
+mvn clean package -DskipTests
+
+git add .
+git commit -m "feat: tambah service baru dan revisi entity"
+git push origin main

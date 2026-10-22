@@ -1,0 +1,118 @@
+package com.erp.system.service;
+
+
+import com.erp.system.entity.UserApplication;
+import com.erp.system.repository.UserApplicationRepository;
+import jakarta.ws.rs.core.Response;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class UserApplicationService {
+
+	@Autowired
+    private UserApplicationRepository userRepository;
+
+    @Autowired
+    private Keycloak keycloak;
+
+    @Value("${keycloak.realm}")
+    private String targetRealm;
+
+    public UserApplication createUser(UserApplication userApp) {
+        // 1. Cek apakah username sudah ada di database lokal
+        if (userRepository.existsByUsername(userApp.getUsername())) {
+            throw new RuntimeException("Username sudah terdaftar di sistem ERP");
+        }
+
+        // 2. Siapkan data profil untuk Keycloak
+        UserRepresentation kcUser = new UserRepresentation();
+        kcUser.setUsername(userApp.getUsername());
+        kcUser.setEmail(userApp.getEmail());
+        kcUser.setFirstName(userApp.getName());
+        kcUser.setEnabled(true);
+        kcUser.setEmailVerified(true);
+
+        // 3. Siapkan Password untuk Keycloak
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(userApp.getPassword()); // Mengambil password dari inputan HRD
+        credential.setTemporary(false); // Password sudah permanen
+        kcUser.setCredentials(Collections.singletonList(credential));
+
+        // 4. Tembak API Keycloak untuk membuat user
+        Response response = keycloak.realm(targetRealm).users().create(kcUser);
+
+        // Status 201 Created artinya sukses dibuat di Keycloak
+        if (response.getStatus() == 201) {
+            // 5. Kosongkan password agar tidak tersimpan di database lokal ERP (Keamanan)
+            userApp.setPassword(null);
+            
+            // 6. Simpan data ke PostgreSQL
+            return userRepository.save(userApp);
+        } else {
+            // Jika gagal di Keycloak (misal username sudah dipakai di realm), gagalkan transaksi
+            throw new RuntimeException("Gagal membuat user di Keycloak. Status: " + response.getStatus());
+        }
+    }
+
+
+    public List<UserApplication> findAll() {
+        return userRepository.findAll();
+    }
+
+    public Optional<UserApplication> findById(Integer id) {
+        return userRepository.findById(id);
+    }
+    
+
+    public UserApplication save(UserApplication user) {
+        // Todo: Add password encoding logic here before saving in production
+        return userRepository.save(user);
+    }
+
+    public UserApplication update(Integer id, UserApplication userDetails) {
+        return userRepository.findById(id).map(user -> {
+            user.setRoleId(userDetails.getRoleId());
+            user.setEmployeeCode(userDetails.getEmployeeCode());
+            user.setName(userDetails.getName());
+            user.setEmail(userDetails.getEmail());
+            user.setMobilephone(userDetails.getMobilephone());
+            user.setIsActive(userDetails.getIsActive());
+            user.setCompany(userDetails.getCompany());
+            user.setCurrency(userDetails.getCurrency());
+            user.setRegional(userDetails.getRegional());
+            user.setBranch(userDetails.getBranch());
+            user.setSubbranch(userDetails.getSubbranch());
+            user.setModifiedBy(userDetails.getModifiedBy());
+            return userRepository.save(user);
+        }).orElseThrow(() -> new RuntimeException("User Application not found with id " + id));
+    }
+
+    public void deleteById(Integer id) {
+    	userRepository.deleteById(id);
+    }
+    
+    public List<UserApplication> findByCompanyId(Integer companyId) {
+        return userRepository.findByCompanyId(companyId);
+    }
+
+    public List<UserApplication> findActiveByCompanyId(Integer companyId) {
+        return userRepository.findByCompanyIdAndIsActive(companyId, 1);
+    }
+
+    public UserApplication findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+    }
+}

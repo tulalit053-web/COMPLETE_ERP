@@ -1,0 +1,21 @@
+package com.erp.system.repository;
+
+import com.erp.system.entity.UserApplication;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserApplicationRepository extends JpaRepository<UserApplication, Integer> {
+    Optional<UserApplication> findByUsername(String username);
+    Optional<UserApplication> findByEmployeeCode(String employeeCode);
+    boolean existsByUsername(String username);
+    
+
+    List<UserApplication> findByCompanyId(Integer companyId);
+
+    List<UserApplication> findByCompanyIdAndIsActive(Integer companyId, Integer isActive);
+
+    List<UserApplication> findByRoleId(Integer roleId);
+}

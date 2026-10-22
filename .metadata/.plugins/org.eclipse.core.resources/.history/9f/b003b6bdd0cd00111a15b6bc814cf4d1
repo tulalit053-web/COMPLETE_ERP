@@ -1,0 +1,67 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.UserApplication;
+import com.erp.system.service.UserApplicationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/users")
+public class UserApplicationController {
+
+    @Autowired
+    private UserApplicationService userApplicationService;
+
+    @GetMapping
+    public List<UserApplication> getAllUsers() {
+        return userApplicationService.findAll();
+    }
+    
+    @PostMapping("/register")
+    public ResponseEntity<?> registerNewUser(@RequestBody UserApplication userApp) {
+        try {
+            UserApplication savedUser = userApplicationService.createUser(userApp);
+            return ResponseEntity.ok(savedUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserApplication> getUserById(@PathVariable Integer id) {
+        return userApplicationService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/username/{username}")
+    public ResponseEntity<UserApplication> getUserByUsername(@PathVariable String username) {
+        return userApplicationService.findByUsername(username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public UserApplication createUser(@RequestBody UserApplication userApplication) {
+        return userApplicationService.save(userApplication);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserApplication> updateUser(@PathVariable Integer id, @RequestBody UserApplication userDetails) {
+        try {
+            UserApplication updatedUser = userApplicationService.update(id, userDetails);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
+        userApplicationService.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+}

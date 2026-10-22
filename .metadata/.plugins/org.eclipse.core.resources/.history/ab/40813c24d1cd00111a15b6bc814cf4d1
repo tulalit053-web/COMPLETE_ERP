@@ -1,0 +1,64 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.Module;
+import com.erp.system.repository.ModuleRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class ModuleService {
+
+    private final ModuleRepository moduleRepository;
+
+    public ModuleService(ModuleRepository moduleRepository) {
+        this.moduleRepository = moduleRepository;
+    }
+
+    public List<Module> findAll() {
+        return moduleRepository.findAll();
+    }
+
+    public Module findById(Integer id) {
+        return moduleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Module not found with id: " + id));
+    }
+
+    public List<Module> findByApplicationId(Integer applicationId) {
+        return moduleRepository.findByApplicationId(applicationId);
+    }
+
+    @Transactional
+    public Module create(Module module) {
+        module.setCreatedDate(LocalDateTime.now());
+        module.setStatus("A");
+        return moduleRepository.save(module);
+    }
+
+    @Transactional
+    public Module update(Integer id, Module module) {
+        Module existing = findById(id);
+        existing.setModuleName(module.getModuleName());
+        existing.setAppPathUrl(module.getAppPathUrl());
+        existing.setDescription(module.getDescription());
+        existing.setStatus(module.getStatus());
+        existing.setApplicationId(module.getApplicationId());
+        existing.setUpdatedDate(LocalDateTime.now());
+        existing.setUpdatedBy(module.getUpdatedBy());
+        return moduleRepository.save(existing);
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+        Module existing = findById(id);
+        moduleRepository.delete(existing);
+    }
+    
+   
+
+    public List<Module> findActiveByApplicationId(Integer applicationId) {
+        return moduleRepository.findByApplicationIdAndStatus(applicationId, "A");
+    }
+}

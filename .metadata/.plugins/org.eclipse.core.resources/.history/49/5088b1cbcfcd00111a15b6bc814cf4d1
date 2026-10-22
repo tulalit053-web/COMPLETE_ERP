@@ -1,0 +1,50 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.Role;
+import com.erp.system.service.RoleService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/roles")
+public class RoleController {
+
+    private final RoleService roleService;
+
+    public RoleController(RoleService roleService) {
+        this.roleService = roleService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Role>> getAll() {
+        return ResponseEntity.ok(roleService.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Role> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(roleService.findById(id));
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<Role>> getActiveRoles() {
+        return ResponseEntity.ok(roleService.findActiveRoles());
+    }
+
+    @PostMapping
+    public ResponseEntity<Role> create(@RequestBody Role role) {
+        return ResponseEntity.ok(roleService.create(role));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Role> update(@PathVariable Integer id, @RequestBody Role role) {
+        return ResponseEntity.ok(roleService.update(id, role));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        roleService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}

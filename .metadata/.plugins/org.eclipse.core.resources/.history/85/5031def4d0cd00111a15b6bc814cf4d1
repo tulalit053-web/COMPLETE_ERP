@@ -1,0 +1,125 @@
+package com.erp.system.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "adm_sec_modules", schema = "schema_admin")
+public class Module {
+
+    @Id
+    @Column(name = "dsmd_module_id")
+    private Integer moduleId;          // karena di DB bukan serial, kita set manual dulu
+
+    @Column(name = "dsmd_module_name", length = 50)
+    private String moduleName;
+
+    @Column(name = "dsmd_app_path_url", length = 512)
+    private String appPathUrl;
+
+    @Column(name = "dsmd_desc", length = 300)
+    private String description;
+
+    @Column(name = "dsmd_status", length = 2)
+    private String status = "A";       // A = Active
+
+    @Column(name = "dsmd_application_id")
+    private Integer applicationId;     // FK ke adm_mst_application
+
+    @Column(name = "dsmd_created_by", length = 15)
+    private String createdBy;
+
+    @Column(name = "dsmd_created_date")
+    private LocalDateTime createdDate;
+
+    @Column(name = "dsmd_updated_by", length = 15)
+    private String updatedBy;
+
+    @Column(name = "dsmd_updated_date")
+    private LocalDateTime updatedDate;
+
+    // ===== Constructor =====
+    public Module() {
+    }
+
+    // ===== Getter & Setter =====
+    public Integer getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Integer moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+    public String getAppPathUrl() {
+        return appPathUrl;
+    }
+
+    public void setAppPathUrl(String appPathUrl) {
+        this.appPathUrl = appPathUrl;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Integer getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(Integer applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public LocalDateTime getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(LocalDateTime updatedDate) {
+        this.updatedDate = updatedDate;
+    }
+}

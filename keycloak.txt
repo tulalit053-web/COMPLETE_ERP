@@ -1,5 +1,32 @@
 client secret : xgnChB2OkZpnYCNWhUFS9eCay4nJXscTlgznyl75M6NT0TG0lPzYcbr4OVmUup7Cc6bCfl1DPd1NNqsSd5nkyh
 
+Rekomendasi Arsitektur (Cocok untuk sistem seperti Accurate)Gunakan pendekatan Hybrid:
+Keycloak hanya untuk:
+Login (Authentication)
+Mengeluarkan JWT Token
+Menyimpan role tingkat tinggi saja (contoh: SUPER_ADMIN, ADMIN, USER)
+
+Database (adm_mst_role + adm_mst_role_menu) untuk:
+Role per Company
+Permission detail per Menu
+Maker-Checker
+Semua logika bisnis authorization
+
+Saat user login:
+Keycloak kasih token
+Aplikasi baca username / sub dari token
+Lalu query ke database untuk mendapatkan Role + Permission yang sebenarnya milik user tersebut (berdasarkan company_id)
+
+Praktik yang Paling Umum Dipakai
+Buat beberapa Realm Role di Keycloak yang sederhana saja (contoh: ADMIN, USER, FINANCE)
+Role detail + permission tetap di database
+Saat registrasi user:
+Simpan ke tabel adm_mst_user_application
+Buat user di Keycloak
+Assign Realm Role sederhana di Keycloak (opsional)
+Assign Role detail di database (role_id)
+
+========================================================================================================================================
 Istilah Penting dalam Keycloak:
 Realm: Ruang kerja atau penyewa (tenant) yang sepenuhnya terisolasi. Sebuah realm mengelola sekumpulan user, credential, role, dan client sendiri tanpa bercampur dengan realm lain. Realm master yang saat ini terbuka di layar Anda adalah bawaan sistem yang fungsinya murni untuk mengelola Keycloak itu sendiri. Data pengguna aplikasi ERP Anda tidak boleh dicampur di sini.   Client: Entitas perangkat lunak yang mendelegasikan proses otentikasinya ke Keycloak. Dalam arsitektur Anda, aplikasi Next.js (frontend) dan Spring Cloud Gateway (backend) bertindak sebagai client.
 User: Pengguna akhir atau sistem yang dapat masuk (login) ke dalam aplikasi.Role: Pengelompokan izin atau hak akses (misalnya: admin, keuangan, operasional). Role dilekatkan pada user untuk membatasi apa saja yang bisa mereka akses di dalam aplikasi.Langkah Selanjutnya:Karena Anda saat ini berada di dalam "master realm", Anda perlu membuat realm khusus untuk proyek ini.   
@@ -17,3 +44,115 @@ Selesaikan ketiga konfigurasi dasar tersebut. Setelah Realm, Client, dan User te
 
 Sebagai referensi di masa depan, berikut adalah ringkasan panduan troubleshooting Keycloak saat menghadapi error otentikasi via API (Postman):
 Verifikasi Konfigurasi Client: Pastikan Client authentication aktif (untuk menghasilkan Client Secret) dan Direct access grants diaktifkan (wajib agar API bisa menerima otentikasi langsung menggunakan username dan password).Status Password Pengguna: Saat melakukan Set Password untuk user via admin konsol, pastikan toggle Temporary selalu dalam posisi OFF. Jika aktif, API akan diblokir karena sistem menunggu user login via browser untuk mengganti password.Pembersihan Aksi Wajib (Required Actions): Kosongkan semua tag di kolom Required user actions pada profil user agar sistem tidak menahan proses login.Kelengkapan Profil & Verifikasi Email: Keycloak versi terbaru sering menolak login API jika profil dasar kosong. Isi Email, First Name, Last Name, lalu aktifkan toggle Email verified menjadi ON.Pengaturan Login Realm: Di menu Realm settings > Login, pastikan opsi Verify email dalam keadaan OFF agar sistem tidak memaksa alur verifikasi email secara global.Penyesuaian Postman: Pada tab Authorization, ubah Client Authentication menjadi Send client credentials in body (menghindari penolakan header Basic Auth), dan biasakan menekan Clear cookies jika Postman menyimpan cache error sebelumnya.Langkah Selanjutnya:Eksekusi Request: Di Postman, klik tombol Use Token pada pop-up yang sedang terbuka. Setelah token masuk ke header, klik tombol Send untuk mengakses http://localhost:8084/api/admins/test. Anda seharusnya sudah tidak mendapatkan 401, melainkan response sukses (200 OK) dari service Anda.   Inisiasi Frontend Next.js: Karena backend (Spring Boot, Gateway, Discovery, Config, Database, dan Security) sudah sepenuhnya rampung dan terkunci rapat, kita sudah siap beralih ke frontend. Kita akan membuat proyek Next.js baru dan merancang antarmuka untuk tabel-tabel di schema_admin secara bertahap.Apakah Anda ingin kita mulai men- setup project Next.js-nya sekarang, atau ada service / repositori backend yang mau dirapikan ke GitHub lagi sebelum pindah haluan?
+
+=======================================================================================================================================
+
+-- =====================================================
+-- 1. COMPANY
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_company 
+(dmc_id, dmc_company_code, dmc_company_name, dmc_is_active, dmc_platform_code, dmc_platform_name, dmc_address, dmc_created_by)
+VALUES
+(1, 'COMP01', 'PT Maju Jaya', 1, 'CONV', 'Convensional', 'Jl. Sudirman No.1 Jakarta', 'system'),
+(2, 'COMP02', 'PT Sejahtera Abadi', 1, 'SYR', 'Syariah', 'Jl. Thamrin No.10 Jakarta', 'system'),
+(3, 'COMP03', 'CV Berkah Mandiri', 1, 'CONV', 'Convensional', 'Jl. Gatot Subroto No.5 Bandung', 'system');
+
+-- =====================================================
+-- 2. APPLICATION
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_application 
+(dmap_id, dmap_application_code, dmap_application_name, dmap_description, dmap_is_active, dmap_created_by)
+VALUES
+(1, 'ACC', 'Accounting', 'Aplikasi Akuntansi', true, 'system'),
+(2, 'HRIS', 'Human Resource', 'Aplikasi HR & Payroll', true, 'system'),
+(3, 'CRM', 'Customer Relationship', 'Aplikasi CRM', true, 'system'),
+(4, 'INV', 'Inventory', 'Aplikasi Persediaan', true, 'system');
+
+-- =====================================================
+-- 3. COMPANY APPLICATION (Company pilih Application)
+-- =====================================================
+-- COMP01 pakai Accounting + HRIS + Inventory
+INSERT INTO schema_admin.adm_mst_company_application 
+(dmca_company_id, dmca_application_id, dmca_is_active, dmca_created_by)
+VALUES
+(1, 1, true, 'system'),  -- ACC
+(1, 2, true, 'system'),  -- HRIS
+(1, 4, true, 'system');  -- INV
+
+-- COMP02 hanya pakai Accounting + CRM
+INSERT INTO schema_admin.adm_mst_company_application 
+(dmca_company_id, dmca_application_id, dmca_is_active, dmca_created_by)
+VALUES
+(2, 1, true, 'system'),  -- ACC
+(2, 3, true, 'system');  -- CRM
+
+-- COMP03 hanya pakai Accounting
+INSERT INTO schema_admin.adm_mst_company_application 
+(dmca_company_id, dmca_application_id, dmca_is_active, dmca_created_by)
+VALUES
+(3, 1, true, 'system');
+
+-- =====================================================
+-- 4. MODULE
+-- =====================================================
+INSERT INTO schema_admin.adm_sec_modules 
+(dsmd_module_id, dsmd_module_name, dsmd_app_path_url, dsmd_desc, dsmd_status, dsmd_application_id, dsmd_created_by, dsmd_created_date)
+VALUES
+(1001, 'Accounts Payable', '/ap', 'Module Hutang', 'A', 1, 'system', now()),
+(1002, 'Accounts Receivable', '/ar', 'Module Piutang', 'A', 1, 'system', now()),
+(1003, 'General Ledger', '/gl', 'Module Buku Besar', 'A', 1, 'system', now()),
+(2001, 'Employee', '/employee', 'Module Karyawan', 'A', 2, 'system', now()),
+(2002, 'Payroll', '/payroll', 'Module Penggajian', 'A', 2, 'system', now()),
+(3001, 'Lead', '/lead', 'Module Lead', 'A', 3, 'system', now()),
+(4001, 'Stock', '/stock', 'Module Stok', 'A', 4, 'system', now());
+
+-- =====================================================
+-- 5. ROLE (per Company)
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_role 
+(dmrole_id, dmrole_role_name, dmrole_is_active, dmrole_company_id, dmrole_company_code, dmrole_created_by)
+VALUES
+(1, 'Super Admin', 1, 1, 'COMP01', 'system'),
+(2, 'Finance Manager', 1, 1, 'COMP01', 'system'),
+(3, 'HR Manager', 1, 1, 'COMP01', 'system'),
+(4, 'Admin COMP02', 1, 2, 'COMP02', 'system'),
+(5, 'Admin COMP03', 1, 3, 'COMP03', 'system');
+
+-- =====================================================
+-- 6. USER (per Company)
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_user_application 
+(dmuapp_id, dmuapp_role_id, dmuapp_employee_code, dmuapp_name, dmuapp_username, dmuapp_email, 
+ dmuapp_is_active, dmuapp_company_id, dmuapp_company, dmuapp_password, dmuapp_created_by)
+VALUES
+(1, 1, 'EMP001', 'Budi Santoso', 'admin.comp01', 'budi@majujaya.com', 1, 1, 'COMP01', '$2a$10$dummyhash', 'system'),
+(2, 2, 'EMP002', 'Siti Aminah', 'finance.comp01', 'siti@majujaya.com', 1, 1, 'COMP01', '$2a$10$dummyhash', 'system'),
+(3, 4, 'EMP003', 'Andi Wijaya', 'admin.comp02', 'andi@sejahtera.com', 1, 2, 'COMP02', '$2a$10$dummyhash', 'system'),
+(4, 5, 'EMP004', 'Rina Marlina', 'admin.comp03', 'rina@berkah.com', 1, 3, 'COMP03', '$2a$10$dummyhash', 'system');
+
+-- =====================================================
+-- 7. MENU (contoh sederhana)
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_menu 
+(dmmenu_id, dmmenu_parent_menu_id, dmmenu_code, dmmenu_menu_name, dmmenu_menu_link, 
+ dmmenu_menu_index, dmmenu_is_active, dmmenu_module_id, dmmenu_show_in_sidemenu, dmmenu_created_by)
+VALUES
+(10001, NULL, 'AP-ROOT', 'Accounts Payable', NULL, 1, 1, 1001, 1, 'system'),
+(10002, 10001, 'AP-INVOICE', 'Invoice', '/ap/invoice', 1, 1, 1001, 1, 'system'),
+(10003, 10001, 'AP-PAYMENT', 'Payment', '/ap/payment', 2, 1, 1001, 1, 'system'),
+(20001, NULL, 'HR-ROOT', 'Human Resource', NULL, 1, 1, 2001, 1, 'system'),
+(20002, 20001, 'HR-EMPLOYEE', 'Employee', '/hr/employee', 1, 1, 2001, 1, 'system');
+
+-- =====================================================
+-- 8. ROLE MENU (contoh permission)
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_role_menu 
+(dmrm_id, dmrm_role_id, dmrm_menu_id, dmrm_is_view, dmrm_is_add, dmrm_is_edit, dmrm_is_delete, dmrm_is_approve, dmrm_is_active, dmrm_created_by)
+VALUES
+(1, 1, 10001, 1, 1, 1, 1, 1, 1, 'system'),
+(2, 1, 10002, 1, 1, 1, 1, 1, 1, 'system'),
+(3, 1, 10003, 1, 1, 1, 1, 1, 1, 'system'),
+(4, 1, 20001, 1, 1, 1, 1, 1, 1, 'system'),
+(5, 1, 20002, 1, 1, 1, 1, 1, 1, 'system'),
+(6, 2, 10001, 1, 1, 1, 0, 1, 1, 'system'),
+(7, 2, 10002, 1, 1, 1, 0, 1, 1, 'system');

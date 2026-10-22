@@ -1,0 +1,114 @@
+package com.erp.system.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "adm_mst_role", schema = "schema_admin")
+public class Role {
+
+    @Id
+    @Column(name = "dmrole_id")
+    private Integer roleId;
+
+    @Column(name = "dmrole_role_name", nullable = false, length = 50)
+    private String roleName;
+
+    @Column(name = "dmrole_is_active")
+    private Integer isActive;
+
+    @Column(name = "dmrole_company_code", length = 50)
+    private String companyCode;
+
+    @Column(name = "dmrole_currency_code", length = 10)
+    private String currencyCode;
+
+    @Column(name = "dmrole_created_datetime")
+    private LocalDateTime createdDatetime;
+
+    @Column(name = "dmrole_created_by", length = 100)
+    private String createdBy;
+
+    @Column(name = "dmrole_modified_datetime")
+    private LocalDateTime modifiedDatetime;
+
+    @Column(name = "dmrole_modified_by", length = 100)
+    private String modifiedBy;
+
+    // ===== Constructor =====
+    public Role() {
+    }
+
+    // ===== Getter & Setter =====
+    public Integer getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public Integer getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Integer isActive) {
+        this.isActive = isActive;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
+    public LocalDateTime getCreatedDatetime() {
+        return createdDatetime;
+    }
+
+    public void setCreatedDatetime(LocalDateTime createdDatetime) {
+        this.createdDatetime = createdDatetime;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getModifiedDatetime() {
+        return modifiedDatetime;
+    }
+
+    public void setModifiedDatetime(LocalDateTime modifiedDatetime) {
+        this.modifiedDatetime = modifiedDatetime;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+}

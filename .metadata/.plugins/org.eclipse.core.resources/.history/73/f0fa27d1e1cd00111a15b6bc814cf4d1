@@ -1,0 +1,15 @@
+server:
+  port: 8881
+
+eureka:
+  instance:
+    hostname: erp-admins
+    
+keycloak:
+  server-url: http://localhost:8180
+  realm: erp-realm
+  admin:
+    realm: master
+    client-id: admin-cli
+    username: admin
+    password: admin

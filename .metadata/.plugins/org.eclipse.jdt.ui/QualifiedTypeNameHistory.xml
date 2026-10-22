@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-    <fullyQualifiedTypeName name="com.erp.system.entity.HrEmployee"/>
-    <fullyQualifiedTypeName name="com.erp.system.service.ResUsersService"/>
     <fullyQualifiedTypeName name="com.erp.system.repository.ResUsersRepository"/>
     <fullyQualifiedTypeName name="com.erp.system.repository.CrmLeadSourceRepository"/>
     <fullyQualifiedTypeName name="com.erp.system.entity.ResUsers"/>
     <fullyQualifiedTypeName name="com.erp.system.entity.CrmLeadSource"/>
     <fullyQualifiedTypeName name="jakarta.persistence.Entity"/>
     <fullyQualifiedTypeName name="jakarta.persistence.Table"/>
-    <fullyQualifiedTypeName name="java.util.List"/>
     <fullyQualifiedTypeName name="com.fasterxml.jackson.annotation.JsonManagedReference"/>
     <fullyQualifiedTypeName name="com.fasterxml.jackson.annotation.JsonBackReference"/>
     <fullyQualifiedTypeName name="com.erp.system.repository.CrmActivityRepository"/>
@@ -17,7 +14,6 @@
     <fullyQualifiedTypeName name="java.time.LocalDate"/>
     <fullyQualifiedTypeName name="java.util.HashMap"/>
     <fullyQualifiedTypeName name="org.springframework.web.bind.annotation.GetMapping"/>
-    <fullyQualifiedTypeName name="java.util.Optional"/>
     <fullyQualifiedTypeName name="com.erp.system.repository.CrmMonthlyTargetRepository"/>
     <fullyQualifiedTypeName name="com.erp.system.entity.CrmLead"/>
     <fullyQualifiedTypeName name="com.erp.system.entity.CrmMonthlyTarget"/>
@@ -60,4 +56,8 @@
     <fullyQualifiedTypeName name="jakarta.transaction.Transactional"/>
     <fullyQualifiedTypeName name="org.springframework.data.jpa.repository.Query"/>
     <fullyQualifiedTypeName name="org.springframework.data.repository.query.Param"/>
+    <fullyQualifiedTypeName name="java.util.Optional"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="com.erp.system.service.UserPermissionService"/>
+    <fullyQualifiedTypeName name="com.erp.system.dto.UserPermissionDto"/>
 </qualifiedTypeNameHistroy>
