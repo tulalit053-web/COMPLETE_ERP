@@ -1,0 +1,50 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.Application;
+import com.erp.system.service.ApplicationService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/applications")
+public class ApplicationController {
+
+    private final ApplicationService applicationService;
+
+    public ApplicationController(ApplicationService applicationService) {
+        this.applicationService = applicationService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Application>> getAll() {
+        return ResponseEntity.ok(applicationService.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Application> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(applicationService.findById(id));
+    }
+
+    @GetMapping("/code/{code}")
+    public ResponseEntity<Application> getByCode(@PathVariable String code) {
+        return ResponseEntity.ok(applicationService.findByCode(code));
+    }
+
+    @PostMapping
+    public ResponseEntity<Application> create(@RequestBody Application application) {
+        return ResponseEntity.ok(applicationService.create(application));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Application> update(@PathVariable Integer id, @RequestBody Application application) {
+        return ResponseEntity.ok(applicationService.update(id, application));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        applicationService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}

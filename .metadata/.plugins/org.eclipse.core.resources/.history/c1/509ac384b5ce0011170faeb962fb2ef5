@@ -1,0 +1,20 @@
+package com.erp.system.repository;
+
+import com.erp.system.entity.Menu;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface MenuRepository extends JpaRepository<Menu, Integer> {
+
+    Optional<Menu> findByMenuCode(String menuCode);
+
+    List<Menu> findByModuleId(Integer moduleId);
+
+    List<Menu> findByParentMenuId(Integer parentMenuId);
+
+    List<Menu> findByParentMenuIdIsNull();   // untuk ambil menu level 1
+}

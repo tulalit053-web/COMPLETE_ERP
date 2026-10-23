@@ -1,0 +1,191 @@
+package com.erp.system.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "adm_mst_menu", schema = "schema_admin")
+public class Menu {
+
+    @Id
+    @Column(name = "dmmenu_id")
+    private Integer menuId;
+
+    @Column(name = "dmmenu_parent_menu_id")
+    private Integer parentMenuId;
+
+    @Column(name = "dmmenu_code", nullable = false, unique = true, length = 50)
+    private String menuCode;
+
+    @Column(name = "dmmenu_menu_name", nullable = false, length = 50)
+    private String menuName;
+
+    @Column(name = "dmmenu_menu_link", length = 50)
+    private String menuLink;
+
+    @Column(name = "dmmenu_menu_index")
+    private Integer menuIndex;
+
+    @Column(name = "dmmenu_is_active")
+    private Integer isActive;               // di DB pakai numeric
+
+    @Column(name = "dmmenu_icon_name", length = 50)
+    private String iconName;
+
+    @Column(name = "dmmenu_module_id")
+    private Integer moduleId;
+
+    @Column(name = "dmmenu_show_in_sidemenu")
+    private Integer showInSidemenu;
+
+    @Column(name = "dmmenu_company_code", length = 50)
+    private String companyCode;
+
+    @Column(name = "dmmenu_currency_code", length = 10)
+    private String currencyCode;
+
+    @Column(name = "dmmenu_created_datetime")
+    private LocalDateTime createdDatetime;
+
+    @Column(name = "dmmenu_created_by", length = 100)
+    private String createdBy;
+
+    @Column(name = "dmmenu_modified_datetime")
+    private LocalDateTime modifiedDatetime;
+
+    @Column(name = "dmmenu_modified_by", length = 100)
+    private String modifiedBy;
+
+    // ===== Constructor =====
+    public Menu() {
+    }
+
+    // ===== Getter & Setter =====
+    public Integer getMenuId() {
+        return menuId;
+    }
+
+    public void setMenuId(Integer menuId) {
+        this.menuId = menuId;
+    }
+
+    public Integer getParentMenuId() {
+        return parentMenuId;
+    }
+
+    public void setParentMenuId(Integer parentMenuId) {
+        this.parentMenuId = parentMenuId;
+    }
+
+    public String getMenuCode() {
+        return menuCode;
+    }
+
+    public void setMenuCode(String menuCode) {
+        this.menuCode = menuCode;
+    }
+
+    public String getMenuName() {
+        return menuName;
+    }
+
+    public void setMenuName(String menuName) {
+        this.menuName = menuName;
+    }
+
+    public String getMenuLink() {
+        return menuLink;
+    }
+
+    public void setMenuLink(String menuLink) {
+        this.menuLink = menuLink;
+    }
+
+    public Integer getMenuIndex() {
+        return menuIndex;
+    }
+
+    public void setMenuIndex(Integer menuIndex) {
+        this.menuIndex = menuIndex;
+    }
+
+    public Integer getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Integer isActive) {
+        this.isActive = isActive;
+    }
+
+    public String getIconName() {
+        return iconName;
+    }
+
+    public void setIconName(String iconName) {
+        this.iconName = iconName;
+    }
+
+    public Integer getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Integer moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public Integer getShowInSidemenu() {
+        return showInSidemenu;
+    }
+
+    public void setShowInSidemenu(Integer showInSidemenu) {
+        this.showInSidemenu = showInSidemenu;
+    }
+
+    public String getCompanyCode() {
+        return companyCode;
+    }
+
+    public void setCompanyCode(String companyCode) {
+        this.companyCode = companyCode;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
+    public LocalDateTime getCreatedDatetime() {
+        return createdDatetime;
+    }
+
+    public void setCreatedDatetime(LocalDateTime createdDatetime) {
+        this.createdDatetime = createdDatetime;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getModifiedDatetime() {
+        return modifiedDatetime;
+    }
+
+    public void setModifiedDatetime(LocalDateTime modifiedDatetime) {
+        this.modifiedDatetime = modifiedDatetime;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+}

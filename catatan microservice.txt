@@ -5,3 +5,287 @@ mvn clean package -DskipTests
 git add .
 git commit -m "feat: tambah service baru dan revisi entity"
 git push origin main
+
+
+Company
+├── COMP01 - PT Maju Jaya
+│   ├── Application: Accounting System (ACC)
+│   │   ├── Module: General Ledger
+│   │   │   ├── Chart of Account          → /acc/gl/coa
+│   │   │   ├── Journal Entry             → /acc/gl/journal
+│   │   │   └── General Ledger            → /acc/gl/ledger
+│   │   ├── Module: Account Payable
+│   │   │   ├── Vendor                    → /acc/ap/vendor
+│   │   │   ├── AP Invoice                → /acc/ap/invoice
+│   │   │   └── AP Payment                → /acc/ap/payment
+│   │   ├── Module: Account Receivable
+│   │   │   ├── Customer                  → /acc/ar/customer
+│   │   │   ├── AR Invoice                → /acc/ar/invoice
+│   │   │   └── AR Receipt                → /acc/ar/receipt
+│   │   ├── Module: Inventory
+│   │   │   ├── Item                      → /acc/inv/item
+│   │   │   ├── Stock Balance             → /acc/inv/stock
+│   │   │   └── Stock Transfer            → /acc/inv/transfer
+│   │   ├── Module: Cash & Bank
+│   │   │   ├── Cash Bank                 → /acc/cb/cashbank
+│   │   │   └── Bank Reconciliation       → /acc/cb/reconciliation
+│   │   ├── Module: Fixed Asset
+│   │   │   ├── Asset Master              → /acc/fa/asset
+│   │   │   └── Depreciation              → /acc/fa/depreciation
+│   │   ├── Module: Taxation
+│   │   │   ├── VAT                       → /acc/tax/vat
+│   │   │   └── Withholding Tax           → /acc/tax/wht
+│   │   └── Module: Reporting
+│   │       ├── Trial Balance             → /acc/report/trial-balance
+│   │       ├── Profit & Loss             → /acc/report/profit-loss
+│   │       └── Balance Sheet             → /acc/report/balance-sheet
+│   │
+│   └── Application: CRM System (CRM)
+│       ├── Module: Lead Management
+│       │   └── Lead                      → /crm/lead
+│       ├── Module: Contact Management
+│       │   └── Contact                   → /crm/contact
+│       ├── Module: Opportunity
+│       │   └── Opportunity               → /crm/opportunity
+│       ├── Module: Activity
+│       │   └── Activity                  → /crm/activity
+│       ├── Module: Quotation
+│       │   └── Quotation                 → /crm/quotation
+│       └── Module: Reporting CRM
+│           └── CRM Dashboard             → /crm/report/dashboard
+│
+├── COMP02 - CV Sukses Bersama
+│   └── Application: Accounting System (ACC)
+│       └── (sama seperti Accounting di COMP01)
+│
+└── COMP03 - PT Global Tech
+    └── Application: HRD System (HRD)
+        ├── Module: Employee
+        │   └── Employee Master           → /hrd/employee
+        ├── Module: Attendance
+        │   └── Attendance                → /hrd/attendance
+        ├── Module: Leave Management
+        │   └── Leave Request             → /hrd/leave
+        ├── Module: Payroll
+        │   └── Payroll Process           → /hrd/payroll
+        ├── Module: Organization
+        │   ├── Department                → /hrd/organization/department
+        │   └── Position                  → /hrd/organization/position
+        └── Module: Reporting HR
+            └── HR Dashboard              → /hrd/report/dashboard
+
+-- =====================================================
+-- 1. BERSIHKAN DATA LAMA (urutan sesuai dependency)
+-- =====================================================
+DELETE FROM schema_admin.adm_mst_role_menu;
+DELETE FROM schema_admin.adm_mst_user_application;
+DELETE FROM schema_admin.adm_mst_company_module;
+DELETE FROM schema_admin.adm_mst_company_application;
+DELETE FROM schema_admin.adm_mst_menu;
+DELETE FROM schema_admin.adm_sec_modules;
+DELETE FROM schema_admin.adm_mst_application;
+DELETE FROM schema_admin.adm_mst_role;
+DELETE FROM schema_admin.adm_mst_company;
+
+-- Reset sequence jika ada (sesuaikan nama sequence Anda)
+-- ALTER SEQUENCE schema_admin.adm_mst_menu_dmmenu_id_seq RESTART WITH 1;
+-- ALTER SEQUENCE schema_admin.adm_mst_role_dmrole_id_seq RESTART WITH 1;
+-- (lakukan untuk sequence lain jika diperlukan)
+
+-- =====================================================
+-- 2. COMPANY
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_company 
+(dmcomp_id, dmcomp_company_code, dmcomp_company_name, dmcomp_is_active, dmcomp_created_by)
+VALUES
+(1, 'COMP01', 'PT Maju Jaya', 1, 'system'),
+(2, 'COMP02', 'CV Sukses Bersama', 1, 'system'),
+(3, 'COMP03', 'PT Global Tech', 1, 'system');
+
+-- =====================================================
+-- 3. APPLICATION
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_application 
+(dmap_id, dmap_application_code, dmap_application_name, dmap_description, dmap_is_active, dmap_created_by)
+VALUES
+(1, 'ACC', 'Accounting System', 'Modul Akuntansi Standar (GL, AP, AR, Inventory, dll)', 1, 'system'),
+(2, 'CRM', 'CRM System', 'Customer Relationship Management', 1, 'system'),
+(3, 'HRD', 'HRD System', 'Human Resource & Payroll', 1, 'system');
+
+-- =====================================================
+-- 4. MODULE
+-- =====================================================
+INSERT INTO schema_admin.adm_sec_modules 
+(dsmd_module_id, dsmd_module_name, dsmd_application_id, dsmd_status, dsmd_created_by)
+VALUES
+-- Accounting
+(101, 'General Ledger', 1, 'A', 'system'),
+(102, 'Account Payable', 1, 'A', 'system'),
+(103, 'Account Receivable', 1, 'A', 'system'),
+(104, 'Inventory', 1, 'A', 'system'),
+(105, 'Cash & Bank', 1, 'A', 'system'),
+(106, 'Fixed Asset', 1, 'A', 'system'),
+(107, 'Taxation', 1, 'A', 'system'),
+(108, 'Reporting', 1, 'A', 'system'),
+
+-- CRM
+(201, 'Lead Management', 2, 'A', 'system'),
+(202, 'Contact Management', 2, 'A', 'system'),
+(203, 'Opportunity', 2, 'A', 'system'),
+(204, 'Activity', 2, 'A', 'system'),
+(205, 'Quotation', 2, 'A', 'system'),
+(206, 'Reporting CRM', 2, 'A', 'system'),
+
+-- HRD
+(301, 'Employee', 3, 'A', 'system'),
+(302, 'Attendance', 3, 'A', 'system'),
+(303, 'Leave Management', 3, 'A', 'system'),
+(304, 'Payroll', 3, 'A', 'system'),
+(305, 'Organization', 3, 'A', 'system'),
+(306, 'Reporting HR', 3, 'A', 'system');
+
+-- =====================================================
+-- 5. MENU (dengan menu_link)
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_menu 
+(dmmenu_id, dmmenu_parent_menu_id, dmmenu_code, dmmenu_menu_name, dmmenu_menu_link, dmmenu_module_id, dmmenu_is_active, dmmenu_created_by)
+VALUES
+-- ========== ACCOUNTING ==========
+-- General Ledger
+(1001, NULL, 'ACC-GL', 'General Ledger', NULL, 101, 1, 'system'),
+(1002, 1001, 'ACC-GL-COA', 'Chart of Account', '/acc/gl/coa', 101, 1, 'system'),
+(1003, 1001, 'ACC-GL-JOURNAL', 'Journal Entry', '/acc/gl/journal', 101, 1, 'system'),
+(1004, 1001, 'ACC-GL-LEDGER', 'General Ledger', '/acc/gl/ledger', 101, 1, 'system'),
+
+-- Account Payable
+(1010, NULL, 'ACC-AP', 'Account Payable', NULL, 102, 1, 'system'),
+(1011, 1010, 'ACC-AP-VENDOR', 'Vendor', '/acc/ap/vendor', 102, 1, 'system'),
+(1012, 1010, 'ACC-AP-INVOICE', 'AP Invoice', '/acc/ap/invoice', 102, 1, 'system'),
+(1013, 1010, 'ACC-AP-PAYMENT', 'AP Payment', '/acc/ap/payment', 102, 1, 'system'),
+
+-- Account Receivable
+(1020, NULL, 'ACC-AR', 'Account Receivable', NULL, 103, 1, 'system'),
+(1021, 1020, 'ACC-AR-CUSTOMER', 'Customer', '/acc/ar/customer', 103, 1, 'system'),
+(1022, 1020, 'ACC-AR-INVOICE', 'AR Invoice', '/acc/ar/invoice', 103, 1, 'system'),
+(1023, 1020, 'ACC-AR-RECEIPT', 'AR Receipt', '/acc/ar/receipt', 103, 1, 'system'),
+
+-- Inventory
+(1030, NULL, 'ACC-INV', 'Inventory', NULL, 104, 1, 'system'),
+(1031, 1030, 'ACC-INV-ITEM', 'Item', '/acc/inv/item', 104, 1, 'system'),
+(1032, 1030, 'ACC-INV-STOCK', 'Stock Balance', '/acc/inv/stock', 104, 1, 'system'),
+(1033, 1030, 'ACC-INV-TRANSFER', 'Stock Transfer', '/acc/inv/transfer', 104, 1, 'system'),
+
+-- Cash & Bank
+(1040, NULL, 'ACC-CB', 'Cash & Bank', NULL, 105, 1, 'system'),
+(1041, 1040, 'ACC-CB-CASH', 'Cash Bank', '/acc/cb/cashbank', 105, 1, 'system'),
+(1042, 1040, 'ACC-CB-RECON', 'Bank Reconciliation', '/acc/cb/reconciliation', 105, 1, 'system'),
+
+-- Fixed Asset
+(1050, NULL, 'ACC-FA', 'Fixed Asset', NULL, 106, 1, 'system'),
+(1051, 1050, 'ACC-FA-ASSET', 'Asset Master', '/acc/fa/asset', 106, 1, 'system'),
+(1052, 1050, 'ACC-FA-DEPR', 'Depreciation', '/acc/fa/depreciation', 106, 1, 'system'),
+
+-- Taxation
+(1060, NULL, 'ACC-TAX', 'Taxation', NULL, 107, 1, 'system'),
+(1061, 1060, 'ACC-TAX-VAT', 'VAT', '/acc/tax/vat', 107, 1, 'system'),
+(1062, 1060, 'ACC-TAX-WHT', 'Withholding Tax', '/acc/tax/wht', 107, 1, 'system'),
+
+-- Reporting Accounting
+(1070, NULL, 'ACC-RPT', 'Reporting', NULL, 108, 1, 'system'),
+(1071, 1070, 'ACC-RPT-TB', 'Trial Balance', '/acc/report/trial-balance', 108, 1, 'system'),
+(1072, 1070, 'ACC-RPT-PL', 'Profit & Loss', '/acc/report/profit-loss', 108, 1, 'system'),
+(1073, 1070, 'ACC-RPT-BS', 'Balance Sheet', '/acc/report/balance-sheet', 108, 1, 'system'),
+
+-- ========== CRM ==========
+(2001, NULL, 'CRM-LEAD', 'Lead Management', NULL, 201, 1, 'system'),
+(2002, 2001, 'CRM-LEAD-LIST', 'Lead', '/crm/lead', 201, 1, 'system'),
+
+(2010, NULL, 'CRM-CONTACT', 'Contact Management', NULL, 202, 1, 'system'),
+(2011, 2010, 'CRM-CONTACT-LIST', 'Contact', '/crm/contact', 202, 1, 'system'),
+
+(2020, NULL, 'CRM-OPP', 'Opportunity', NULL, 203, 1, 'system'),
+(2021, 2020, 'CRM-OPP-LIST', 'Opportunity', '/crm/opportunity', 203, 1, 'system'),
+
+(2030, NULL, 'CRM-ACT', 'Activity', NULL, 204, 1, 'system'),
+(2031, 2030, 'CRM-ACT-LIST', 'Activity', '/crm/activity', 204, 1, 'system'),
+
+(2040, NULL, 'CRM-QUO', 'Quotation', NULL, 205, 1, 'system'),
+(2041, 2040, 'CRM-QUO-LIST', 'Quotation', '/crm/quotation', 205, 1, 'system'),
+
+(2050, NULL, 'CRM-RPT', 'Reporting CRM', NULL, 206, 1, 'system'),
+(2051, 2050, 'CRM-RPT-DASH', 'CRM Dashboard', '/crm/report/dashboard', 206, 1, 'system'),
+
+-- ========== HRD ==========
+(3001, NULL, 'HRD-EMP', 'Employee', NULL, 301, 1, 'system'),
+(3002, 3001, 'HRD-EMP-LIST', 'Employee Master', '/hrd/employee', 301, 1, 'system'),
+
+(3010, NULL, 'HRD-ATT', 'Attendance', NULL, 302, 1, 'system'),
+(3011, 3010, 'HRD-ATT-LIST', 'Attendance', '/hrd/attendance', 302, 1, 'system'),
+
+(3020, NULL, 'HRD-LEAVE', 'Leave Management', NULL, 303, 1, 'system'),
+(3021, 3020, 'HRD-LEAVE-LIST', 'Leave Request', '/hrd/leave', 303, 1, 'system'),
+
+(3030, NULL, 'HRD-PAY', 'Payroll', NULL, 304, 1, 'system'),
+(3031, 3030, 'HRD-PAY-LIST', 'Payroll Process', '/hrd/payroll', 304, 1, 'system'),
+
+(3040, NULL, 'HRD-ORG', 'Organization', NULL, 305, 1, 'system'),
+(3041, 3040, 'HRD-ORG-DEPT', 'Department', '/hrd/organization/department', 305, 1, 'system'),
+(3042, 3040, 'HRD-ORG-POS', 'Position', '/hrd/organization/position', 305, 1, 'system'),
+
+(3050, NULL, 'HRD-RPT', 'Reporting HR', NULL, 306, 1, 'system'),
+(3051, 3050, 'HRD-RPT-DASH', 'HR Dashboard', '/hrd/report/dashboard', 306, 1, 'system');
+
+-- =====================================================
+-- 6. COMPANY APPLICATION
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_company_application 
+(dmca_company_id, dmca_application_id, dmca_is_active, dmca_created_by)
+VALUES
+(1, 1, true, 'system'), -- COMP01 pakai Accounting
+(1, 2, true, 'system'), -- COMP01 pakai CRM
+(2, 1, true, 'system'), -- COMP02 pakai Accounting
+(3, 3, true, 'system'); -- COMP03 pakai HRD
+
+-- =====================================================
+-- 7. ROLE
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_role 
+(dmrole_id, dmrole_role_name, dmrole_company_id, dmrole_is_active, dmrole_created_by)
+VALUES
+(1, 'Super Admin', 1, 1, 'system'),
+(2, 'Accounting Admin', 1, 1, 'system'),
+(3, 'CRM User', 1, 1, 'system'),
+(4, 'HR Admin', 3, 1, 'system');
+
+-- =====================================================
+-- 8. ROLE MENU (contoh: Super Admin full access)
+-- =====================================================
+-- Super Admin (role 1) full access ke semua menu yang punya link
+INSERT INTO schema_admin.adm_mst_role_menu 
+(dmrm_role_id, dmrm_menu_id, dmrm_is_view, dmrm_is_add, dmrm_is_edit, dmrm_is_delete, dmrm_is_approve, dmrm_created_by)
+SELECT 1, dmmenu_id, 1, 1, 1, 1, 1, 'system'
+FROM schema_admin.adm_mst_menu
+WHERE dmmenu_menu_link IS NOT NULL;
+
+-- Accounting Admin (role 2) hanya Accounting
+INSERT INTO schema_admin.adm_mst_role_menu 
+(dmrm_role_id, dmrm_menu_id, dmrm_is_view, dmrm_is_add, dmrm_is_edit, dmrm_is_delete, dmrm_is_approve, dmrm_created_by)
+SELECT 2, dmmenu_id, 1, 1, 1, 0, 0, 'system'
+FROM schema_admin.adm_mst_menu
+WHERE dmmenu_module_id BETWEEN 101 AND 108
+  AND dmmenu_menu_link IS NOT NULL;
+
+-- =====================================================
+-- 9. USER (simulasi)
+-- =====================================================
+INSERT INTO schema_admin.adm_mst_user_application 
+(dmuapp_role_id, dmuapp_name, dmuapp_username, dmuapp_email, dmuapp_is_active, dmuapp_company_id, dmuapp_company, dmuapp_created_by)
+VALUES
+(1, 'Budi Santoso', 'budi.santoso', 'budi.santoso@contoh.com', 1, 1, 'COMP01', 'system'),
+(2, 'Siti Akuntansi', 'siti.acc', 'siti.acc@contoh.com', 1, 1, 'COMP01', 'system'),
+(3, 'Andi CRM', 'andi.crm', 'andi.crm@contoh.com', 1, 1, 'COMP01', 'system'),
+(4, 'Dewi HR', 'dewi.hr', 'dewi.hr@contoh.com', 1, 3, 'COMP03', 'system');
+
+-- =====================================================
+-- SELESAI
+-- =====================================================

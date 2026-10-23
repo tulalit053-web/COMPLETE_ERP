@@ -1,0 +1,75 @@
+package com.erp.system.interceptor;
+
+import com.erp.system.entity.Menu;
+import com.erp.system.repository.MenuRepository;
+import com.erp.system.service.UserPermissionService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+@Component
+public class PermissionInterceptor implements HandlerInterceptor {
+
+    private final MenuRepository menuRepository;
+    private final UserPermissionService userPermissionService;
+
+    public PermissionInterceptor(MenuRepository menuRepository,
+                                 UserPermissionService userPermissionService) {
+        this.menuRepository = menuRepository;
+        this.userPermissionService = userPermissionService;
+    }
+
+    @Override
+    public boolean preHandle(HttpServletRequest request,
+                             HttpServletResponse response,
+                             Object handler) throws Exception {
+
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+
+        // Skip endpoint yang tidak perlu dicek (contoh: /me, actuator, dll)
+        if (path.contains("/me") || path.contains("/actuator") || path.contains("/public")) {
+            return true;
+        }
+
+        // Ambil username dari token
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt jwt)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return false;
+        }
+        String username = jwt.getClaimAsString("preferred_username");
+
+        // Cari menu berdasarkan menu_link
+        Menu menu = menuRepository.findByMenuLink(path)
+                .orElse(null);
+
+        // Kalau menu tidak ditemukan, biarkan lewat (atau tolak, sesuai kebijakan)
+        if (menu == null) {
+            return true;
+        }
+
+        // Tentukan action berdasarkan HTTP method
+        String action = switch (method) {
+            case "GET"    -> "VIEW";
+            case "POST"   -> "ADD";
+            case "PUT"    -> "EDIT";
+            case "DELETE" -> "DELETE";
+            default -> "VIEW";
+        };
+
+        // Cek permission
+        boolean allowed = userPermissionService.hasPermission(username, menu.getMenuCode(), action);
+
+        if (!allowed) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, 
+                "Access denied. No " + action + " permission on " + menu.getMenuCode());
+            return false;
+        }
+
+        return true;
+    }
+}

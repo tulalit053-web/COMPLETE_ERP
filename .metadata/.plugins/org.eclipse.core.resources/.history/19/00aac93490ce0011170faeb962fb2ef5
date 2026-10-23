@@ -1,0 +1,5 @@
+package com.erp.system.annotation;
+
+public class RequirePermission {
+
+}

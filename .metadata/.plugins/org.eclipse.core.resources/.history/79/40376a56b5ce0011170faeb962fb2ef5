@@ -1,0 +1,5 @@
+package com.erp.system.interceptor;
+
+public class PermissionInterceptor {
+
+}

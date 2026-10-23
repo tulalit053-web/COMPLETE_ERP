@@ -1,0 +1,57 @@
+package com.erp.system.controller;
+
+import com.erp.system.annotation.RequirePermission;
+import com.erp.system.entity.Application;
+import com.erp.system.service.ApplicationService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/applications")
+public class ApplicationController {
+
+    private final ApplicationService applicationService;
+
+    public ApplicationController(ApplicationService applicationService) {
+        this.applicationService = applicationService;
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Application> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(applicationService.findById(id));
+    }
+
+    @GetMapping("/code/{code}")
+    public ResponseEntity<Application> getByCode(@PathVariable String code) {
+        return ResponseEntity.ok(applicationService.findByCode(code));
+    }
+
+    
+    @RequirePermission(menuCode = "AP-ROOT", action = "VIEW")
+    @GetMapping
+    public ResponseEntity<List<Application>> getAll() {
+        return ResponseEntity.ok(applicationService.findAll());
+    }
+
+    @RequirePermission(menuCode = "AP-ROOT", action = "ADD")
+    @PostMapping
+    public ResponseEntity<Application> create(@RequestBody Application application) {
+        return ResponseEntity.ok(applicationService.create(application));
+    }
+
+    @RequirePermission(menuCode = "AP-ROOT", action = "EDIT")
+    @PutMapping("/{id}")
+    public ResponseEntity<Application> update(@PathVariable Integer id, @RequestBody Application application) {
+        return ResponseEntity.ok(applicationService.update(id, application));
+    }
+
+    @RequirePermission(menuCode = "AP-ROOT", action = "DELETE")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        applicationService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
