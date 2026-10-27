@@ -1,0 +1,268 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.LoginLog;
+import com.erp.system.entity.UserApplication;
+import com.erp.system.repository.LoginLogRepository;
+import com.erp.system.repository.UserApplicationRepository;
+import jakarta.ws.rs.core.Response;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class UserApplicationService {
+
+    @Autowired    private UserApplicationRepository userRepository;
+
+    @Autowired
+    private Keycloak keycloak;
+    @Autowired
+    private UserPermissionService userPermissionService;
+    @Autowired
+    private LoginLogRepository loginLogRepository;
+    
+    @Value("${keycloak.realm}")
+    private String targetRealm;
+
+    public UserApplication createUser(UserApplication userApp, String currentUsername) {
+        // Cek hak akses
+        if (!userPermissionService.isGlobalSuperAdmin(currentUsername)) {
+            Integer companyId = userPermissionService.getCurrentUserCompanyId(currentUsername);
+            if (userApp.getCompanyId() == null || !companyId.equals(userApp.getCompanyId())) {
+                throw new RuntimeException("You can only create user in your own company");
+            }
+        }
+
+        if (userRepository.existsByUsername(userApp.getUsername())) {
+            throw new RuntimeException("Username sudah terdaftar di sistem ERP");
+        }
+
+        // Keycloak
+        UserRepresentation kcUser = new UserRepresentation();
+        kcUser.setUsername(userApp.getUsername());
+        kcUser.setEmail(userApp.getEmail());
+        kcUser.setFirstName(userApp.getName());
+        kcUser.setEnabled(true);
+        kcUser.setEmailVerified(true);
+
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(userApp.getPassword());
+        credential.setTemporary(false);
+        kcUser.setCredentials(Collections.singletonList(credential));
+
+        Response response = keycloak.realm(targetRealm).users().create(kcUser);
+
+        if (response.getStatus() == 201) {
+            userApp.setPassword(null);
+            return userRepository.save(userApp);
+        } else {
+            throw new RuntimeException("Gagal membuat user di Keycloak. Status: " + response.getStatus());
+        }
+    }
+
+    public List<UserApplication> findAll(String username) {
+        if (userPermissionService.isGlobalSuperAdmin(username)) {
+            return userRepository.findAll();
+        } else {
+            Integer companyId = userPermissionService.getCurrentUserCompanyId(username);
+            return userRepository.findByCompanyId(companyId);
+        }
+    }
+
+    public Optional<UserApplication> findById(Integer id, String username) {
+        Optional<UserApplication> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) return Optional.empty();
+
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            Integer companyId = userPermissionService.getCurrentUserCompanyId(username);
+            if (!companyId.equals(userOpt.get().getCompanyId())) {
+                return Optional.empty();
+            }
+        }
+        return userOpt;
+    }
+
+   /* public UserApplication update(Integer id, UserApplication userDetails, String username) {
+        UserApplication existing = findById(id, username)
+                .orElseThrow(() -> new RuntimeException("User not found or access denied"));
+
+        existing.setRoleId(userDetails.getRoleId());
+        existing.setEmployeeCode(userDetails.getEmployeeCode());
+        existing.setName(userDetails.getName());
+        existing.setEmail(userDetails.getEmail());
+        existing.setMobilePhone(userDetails.getMobilePhone());
+        existing.setIsActive(userDetails.getIsActive());
+        existing.setCompany(userDetails.getCompany());
+        existing.setCurrency(userDetails.getCurrency());
+        existing.setRegional(userDetails.getRegional());
+        existing.setBranch(userDetails.getBranch());
+        existing.setSubBranch(userDetails.getSubBranch());
+        existing.setModifiedBy(userDetails.getModifiedBy());
+
+        return userRepository.save(existing);
+    }*/
+    
+    public UserApplication update(Integer id, UserApplication userDetails, String username) {
+        UserApplication existing = findById(id, username)
+                .orElseThrow(() -> new RuntimeException("User not found or access denied"));
+
+        // Update di Keycloak
+        try {
+            UserRepresentation kcUser = keycloak.realm(targetRealm)
+                    .users()
+                    .search(existing.getUsername())
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+
+            if (kcUser != null) {
+                kcUser.setEmail(userDetails.getEmail());
+                kcUser.setFirstName(userDetails.getName());
+                kcUser.setEnabled(userDetails.getIsActive() != null && userDetails.getIsActive() == 1);
+                keycloak.realm(targetRealm).users().get(kcUser.getId()).update(kcUser);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Gagal update user di Keycloak: " + e.getMessage());
+        }
+
+        // Update di database
+        existing.setRoleId(userDetails.getRoleId());
+        existing.setEmployeeCode(userDetails.getEmployeeCode());
+        existing.setName(userDetails.getName());
+        existing.setEmail(userDetails.getEmail());
+        existing.setMobilePhone(userDetails.getMobilePhone());
+        existing.setIsActive(userDetails.getIsActive());
+        existing.setCompany(userDetails.getCompany());
+        existing.setCurrency(userDetails.getCurrency());
+        existing.setRegional(userDetails.getRegional());
+        existing.setBranch(userDetails.getBranch());
+        existing.setSubBranch(userDetails.getSubBranch());
+        existing.setModifiedBy(userDetails.getModifiedBy());
+
+        return userRepository.save(existing);
+    }
+
+   /* public void deleteById(Integer id, String username) {
+        UserApplication existing = findById(id, username)
+                .orElseThrow(() -> new RuntimeException("User not found or access denied"));
+        userRepository.delete(existing);
+    }*/
+    
+    public void deleteById(Integer id, String username) {
+        UserApplication existing = findById(id, username)
+                .orElseThrow(() -> new RuntimeException("User not found or access denied"));
+
+        // Disable di Keycloak (lebih aman daripada hard delete)
+        try {
+            UserRepresentation kcUser = keycloak.realm(targetRealm)
+                    .users()
+                    .search(existing.getUsername())
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+
+            if (kcUser != null) {
+                kcUser.setEnabled(false);
+                keycloak.realm(targetRealm).users().get(kcUser.getId()).update(kcUser);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Gagal disable user di Keycloak: " + e.getMessage());
+        }
+
+        // Hapus atau nonaktifkan di database
+        existing.setIsActive(0);
+        userRepository.save(existing);
+        // atau userRepository.delete(existing); kalau ingin hard delete
+    }
+
+    public List<UserApplication> findByCompanyId(Integer companyId, String username) {
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            Integer userCompanyId = userPermissionService.getCurrentUserCompanyId(username);
+            if (!userCompanyId.equals(companyId)) {
+                throw new RuntimeException("Access denied to this company");
+            }
+        }
+        return userRepository.findByCompanyId(companyId);
+    }
+
+    public List<UserApplication> findActiveByCompanyId(Integer companyId, String username) {
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            Integer userCompanyId = userPermissionService.getCurrentUserCompanyId(username);
+            if (!userCompanyId.equals(companyId)) {
+                throw new RuntimeException("Access denied to this company");
+            }
+        }
+        return userRepository.findByCompanyIdAndIsActive(companyId, 1);
+    }
+
+    public UserApplication findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+    }
+    
+    public void changePassword(String username, String newPassword, String currentUsername) {
+        // Cek hak akses (bisa hanya diri sendiri atau admin)
+        UserApplication user = findByUsername(username);
+
+        try {
+            UserRepresentation kcUser = keycloak.realm(targetRealm)
+                    .users()
+                    .search(username)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("User tidak ditemukan di Keycloak"));
+
+            CredentialRepresentation credential = new CredentialRepresentation();
+            credential.setType(CredentialRepresentation.PASSWORD);
+            credential.setValue(newPassword);
+            credential.setTemporary(false);
+
+            keycloak.realm(targetRealm)
+                    .users()
+                    .get(kcUser.getId())
+                    .resetPassword(credential);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Gagal ganti password di Keycloak: " + e.getMessage());
+        }
+    }
+    
+    public void recordLogin(String username, String ipAddress, String userAgent, 
+            String deviceId, String status, String remarks) {
+		try {
+		UserApplication user = userRepository.findByUsername(username).orElse(null);
+		
+		LoginLog log = new LoginLog();
+		log.setUsername(username);
+		log.setLoginDatetime(LocalDateTime.now());
+		log.setIpAddress(ipAddress);
+		log.setUserAgent(userAgent);
+		log.setDeviceId(deviceId);
+		log.setLoginStatus(status);
+		log.setRemarks(remarks);
+		
+		if (user != null) {
+			log.setUserId(user.getId());
+			log.setCompanyId(user.getCompanyId());
+		}
+		
+		loginLogRepository.save(log);
+		} catch (Exception e) {
+		// Jangan gagalkan proses login hanya karena gagal mencatat log
+			System.err.println("Gagal mencatat login log: " + e.getMessage());
+		}
+	}
+    
+    
+}

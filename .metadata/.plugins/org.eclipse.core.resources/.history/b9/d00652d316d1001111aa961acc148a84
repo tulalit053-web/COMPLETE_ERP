@@ -1,0 +1,73 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.UserApplication;
+import com.erp.system.service.UserApplicationService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/users")
+public class UserApplicationController {
+
+    private final UserApplicationService service;
+
+    public UserApplicationController(UserApplicationService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserApplication>> getAll(@AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.findAll(username));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserApplication> getById(@PathVariable Integer id,
+                                                   @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return service.findById(id, username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<UserApplication> create(@RequestBody UserApplication user,
+                                                  @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.createUser(user, username));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserApplication> update(@PathVariable Integer id,
+                                                  @RequestBody UserApplication user,
+                                                  @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.update(id, user, username));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id,
+                                       @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        service.deleteById(id, username);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<List<UserApplication>> getByCompanyId(@PathVariable Integer companyId,
+                                                                @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.findByCompanyId(companyId, username));
+    }
+
+    @GetMapping("/company/{companyId}/active")
+    public ResponseEntity<List<UserApplication>> getActiveByCompanyId(@PathVariable Integer companyId,
+                                                                      @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.findActiveByCompanyId(companyId, username));
+    }
+}

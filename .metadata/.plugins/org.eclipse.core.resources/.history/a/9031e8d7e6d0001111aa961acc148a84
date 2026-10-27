@@ -1,0 +1,57 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.Company;
+import com.erp.system.repository.CompanyRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class CompanyService {
+
+    @Autowired
+    private CompanyRepository companyRepository;
+
+    public List<Company> findAll() {
+    	if (userPermissionService.isGlobalSuperAdmin(username)) {
+            return companyRepository.findAll();
+        } else {
+            Integer companyId = userPermissionService.getCurrentUserCompanyId(username);
+            return companyRepository.findById(companyId)
+                    .map(List::of)
+                    .orElse(List.of());
+        }
+    	
+       // return companyRepository.findAll();
+    }
+
+    public Optional<Company> findById(Integer id) {
+        return companyRepository.findById(id);
+    }
+
+    public Company save(Company company) {
+        return companyRepository.save(company);
+    }
+
+    public Company update(Integer id, Company companyDetails) {
+        return companyRepository.findById(id).map(company -> {
+            company.setCompanyCode(companyDetails.getCompanyCode());
+            company.setCompanyName(companyDetails.getCompanyName());
+            company.setIsActive(companyDetails.getIsActive());
+            company.setPlatformCode(companyDetails.getPlatformCode());
+            company.setPlatformName(companyDetails.getPlatformName());
+            company.setAddress(companyDetails.getAddress());
+            company.setModifiedBy(companyDetails.getModifiedBy());
+            return companyRepository.save(company);
+        }).orElseThrow(() -> new RuntimeException("Company not found with id " + id));
+    }
+
+    public void deleteById(Integer id) {
+        companyRepository.deleteById(id);
+    }
+}

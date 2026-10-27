@@ -1,0 +1,76 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.RoleMenu;
+import com.erp.system.repository.RoleMenuRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class RoleMenuService {
+
+    private final RoleMenuRepository roleMenuRepository;
+
+    public RoleMenuService(RoleMenuRepository roleMenuRepository) {
+        this.roleMenuRepository = roleMenuRepository;
+    }
+
+    public List<RoleMenu> findAll() {
+        return roleMenuRepository.findAll();
+    }
+
+    public RoleMenu findById(Integer id) {
+        return roleMenuRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("RoleMenu not found with id: " + id));
+    }
+
+    public List<RoleMenu> findByRoleId(Integer roleId) {
+        return roleMenuRepository.findByRoleId(roleId);
+    }
+
+    public List<RoleMenu> findByMenuId(Integer menuId) {
+        return roleMenuRepository.findByMenuId(menuId);
+    }
+
+    @Transactional
+    public RoleMenu create(RoleMenu roleMenu) {
+        // Cek apakah kombinasi role + menu sudah ada
+        roleMenuRepository.findByRoleIdAndMenuId(roleMenu.getRoleId(), roleMenu.getMenuId())
+                .ifPresent(rm -> {
+                    throw new RuntimeException("RoleMenu already exists for this role and menu");
+                });
+
+        roleMenu.setCreatedDatetime(LocalDateTime.now());
+        if (roleMenu.getIsActive() == null) {
+            roleMenu.setIsActive(1);
+        }
+        return roleMenuRepository.save(roleMenu);
+    }
+
+    @Transactional
+    public RoleMenu update(Integer id, RoleMenu roleMenu) {
+        RoleMenu existing = findById(id);
+        existing.setIsView(roleMenu.getIsView());
+        existing.setIsAdd(roleMenu.getIsAdd());
+        existing.setIsEdit(roleMenu.getIsEdit());
+        existing.setIsDelete(roleMenu.getIsDelete());
+        existing.setIsApprove(roleMenu.getIsApprove());
+        existing.setIsActive(roleMenu.getIsActive());
+        existing.setModifiedDatetime(LocalDateTime.now());
+        existing.setModifiedBy(roleMenu.getModifiedBy());
+        return roleMenuRepository.save(existing);
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+        RoleMenu existing = findById(id);
+        roleMenuRepository.delete(existing);
+    }
+
+    @Transactional
+    public void deleteByRoleId(Integer roleId) {
+        roleMenuRepository.deleteByRoleId(roleId);
+    }
+}

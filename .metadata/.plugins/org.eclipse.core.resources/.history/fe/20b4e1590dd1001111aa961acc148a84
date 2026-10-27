@@ -1,0 +1,91 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.Module;
+import com.erp.system.repository.ModuleRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class ModuleService {
+
+    private final ModuleRepository repository;
+    private final UserPermissionService userPermissionService;
+
+    public ModuleService(ModuleRepository repository,
+                         UserPermissionService userPermissionService) {
+        this.repository = repository;
+        this.userPermissionService = userPermissionService;
+    }
+
+    public List<Module> findAll(String username) {
+        if (userPermissionService.isGlobalSuperAdmin(username)) {
+            return repository.findAll();
+        } else {
+            Integer companyId = userPermissionService.getCurrentUserCompanyId(username);
+
+            // Ambil applicationId yang aktif di company ini
+            List<Integer> activeAppIds = companyApplicationRepository
+                    .findByCompanyIdAndIsActiveTrue(companyId)
+                    .stream()
+                    .map(ca -> ca.getApplicationId())
+                    .collect(Collectors.toList());
+
+            if (activeAppIds.isEmpty()) {
+                return List.of();
+            }
+
+            // Ambil module yang applicationId-nya ada di daftar aktif
+            return repository.findByApplicationIdIn(activeAppIds);
+        }
+    }
+
+    public Module findById(Integer id, String username) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Module not found with id: " + id));
+    }
+
+    public List<Module> findByApplicationId(Integer applicationId, String username) {
+        return repository.findByApplicationId(applicationId);
+    }
+
+    @Transactional
+    public Module create(Module module, String username) {
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            throw new RuntimeException("Only Global Super Admin can create module");
+        }
+        module.setCreatedDate(LocalDateTime.now());
+        if (module.getStatus() == null) {
+            module.setStatus("A");
+        }
+        return repository.save(module);
+    }
+
+    @Transactional
+    public Module update(Integer id, Module module, String username) {
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            throw new RuntimeException("Only Global Super Admin can update module");
+        }
+
+        Module existing = findById(id, username);
+        existing.setModuleName(module.getModuleName());
+        existing.setAppPathUrl(module.getAppPathUrl());
+        existing.setDescription(module.getDescription());
+        existing.setStatus(module.getStatus());
+        existing.setApplicationId(module.getApplicationId());
+        existing.setUpdatedBy(module.getUpdatedBy());
+        existing.setUpdatedDate(LocalDateTime.now());
+        return repository.save(existing);
+    }
+
+    @Transactional
+    public void delete(Integer id, String username) {
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            throw new RuntimeException("Only Global Super Admin can delete module");
+        }
+        Module existing = findById(id, username);
+        repository.delete(existing);
+    }
+}

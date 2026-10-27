@@ -1,0 +1,60 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.Menu;
+import com.erp.system.service.MenuService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/menus")
+public class MenuController {
+
+    private final MenuService menuService;
+
+    public MenuController(MenuService menuService) {
+        this.menuService = menuService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Menu>> getAll() {
+        return ResponseEntity.ok(menuService.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Menu> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(menuService.findById(id));
+    }
+
+    @GetMapping("/module/{moduleId}")
+    public ResponseEntity<List<Menu>> getByModuleId(@PathVariable Integer moduleId) {
+        return ResponseEntity.ok(menuService.findByModuleId(moduleId));
+    }
+
+    @GetMapping("/root")
+    public ResponseEntity<List<Menu>> getRootMenus() {
+        return ResponseEntity.ok(menuService.findRootMenus());
+    }
+
+    @GetMapping("/parent/{parentId}")
+    public ResponseEntity<List<Menu>> getByParentId(@PathVariable Integer parentId) {
+        return ResponseEntity.ok(menuService.findByParentId(parentId));
+    }
+
+    @PostMapping
+    public ResponseEntity<Menu> create(@RequestBody Menu menu) {
+        return ResponseEntity.ok(menuService.create(menu));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Menu> update(@PathVariable Integer id, @RequestBody Menu menu) {
+        return ResponseEntity.ok(menuService.update(id, menu));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        menuService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}

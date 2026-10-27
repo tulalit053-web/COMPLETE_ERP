@@ -1,0 +1,42 @@
+package com.erp.system.controller;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.erp.system.dto.UserPermissionDto;
+import com.erp.system.service.UserPermissionService;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/me")
+public class MeController {
+	
+	private final UserPermissionService userPermissionService;
+
+    public MeController(UserPermissionService userPermissionService) {
+        this.userPermissionService = userPermissionService;
+    }
+
+    
+
+    @GetMapping("/permissions")
+    public UserPermissionDto getMyPermissions(@AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return userPermissionService.getPermissionByUsername(username);
+    }
+
+    @GetMapping
+    public Map<String, Object> getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
+        return Map.of(
+                "username", jwt.getClaimAsString("preferred_username"),
+                "email", jwt.getClaimAsString("email"),
+                "name", jwt.getClaimAsString("name"),
+                "subject", jwt.getSubject(),
+                "allClaims", jwt.getClaims()
+        );
+    }
+}

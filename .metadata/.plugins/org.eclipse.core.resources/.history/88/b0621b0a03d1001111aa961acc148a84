@@ -1,0 +1,65 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.Module;
+import com.erp.system.repository.ModuleRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class ModuleService {
+
+    private final ModuleRepository repository;
+    private final UserPermissionService userPermissionService;
+
+    public ModuleService(ModuleRepository repository,
+                         UserPermissionService userPermissionService) {
+        this.repository = repository;
+        this.userPermissionService = userPermissionService;
+    }
+
+    public List<Module> findAll() {
+        return repository.findAll();
+    }
+
+    public Module findById(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Module not found with id: " + id));
+    }
+
+    public List<Module> findByApplicationId(Integer applicationId) {
+        return repository.findByApplicationId(applicationId);
+    }
+
+    @Transactional
+    public Module create(Module module, String username) {
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            throw new RuntimeException("Only Global Super Admin can create module");
+        }
+        module.setCreatedDatetime(LocalDateTime.now());
+        return repository.save(module);
+    }
+
+    @Transactional
+    public Module update(Integer id, Module module, String username) {
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            throw new RuntimeException("Only Global Super Admin can update module");
+        }
+        Module existing = findById(id);
+        existing.setModuleName(module.getModuleName());
+        existing.setStatus(module.getStatus());
+        existing.setModifiedDatetime(LocalDateTime.now());
+        existing.setModifiedBy(module.getModifiedBy());
+        return repository.save(existing);
+    }
+
+    @Transactional
+    public void delete(Integer id, String username) {
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            throw new RuntimeException("Only Global Super Admin can delete module");
+        }
+        repository.deleteById(id);
+    }
+}

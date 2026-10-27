@@ -1,0 +1,64 @@
+package com.erp.system.controller;
+
+
+import com.erp.system.service.ModuleService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/modules")
+public class ModuleController {
+
+    private final ModuleService service;
+
+    public ModuleController(ModuleService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Module>> getAll(@AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.findAll(username));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Module> getById(@PathVariable Integer id,
+                                          @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.findById(id, username));
+    }
+
+    @GetMapping("/application/{applicationId}")
+    public ResponseEntity<List<Module>> getByApplicationId(@PathVariable Integer applicationId,
+                                                           @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.findByApplicationId(applicationId, username));
+    }
+
+    @PostMapping
+    public ResponseEntity<Module> create(@RequestBody Module module,
+                                         @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.create(module, username));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Module> update(@PathVariable Integer id,
+                                         @RequestBody Module module,
+                                         @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.update(id, module, username));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id,
+                                       @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        service.delete(id, username);
+        return ResponseEntity.noContent().build();
+    }
+}

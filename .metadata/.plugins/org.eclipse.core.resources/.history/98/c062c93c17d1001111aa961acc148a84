@@ -1,0 +1,102 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.UserApplication;
+import com.erp.system.service.UserApplicationService;
+import com.erp.system.service.UserPermissionService;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/users")
+public class UserApplicationController {
+
+	private final UserApplicationService service;
+    private final UserPermissionService userPermissionService;
+
+    public UserApplicationController(UserApplicationService service,
+                                     UserPermissionService userPermissionService) {
+        this.service = service;
+        this.userPermissionService = userPermissionService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserApplication>> getAll(@AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.findAll(username));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserApplication> getById(@PathVariable Integer id,
+                                                   @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return service.findById(id, username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<UserApplication> create(@RequestBody UserApplication user,
+                                                  @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.createUser(user, username));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserApplication> update(@PathVariable Integer id,
+                                                  @RequestBody UserApplication user,
+                                                  @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.update(id, user, username));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id,
+                                       @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        service.deleteById(id, username);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<List<UserApplication>> getByCompanyId(@PathVariable Integer companyId,
+                                                                @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.findByCompanyId(companyId, username));
+    }
+
+    @GetMapping("/company/{companyId}/active")
+    public ResponseEntity<List<UserApplication>> getActiveByCompanyId(@PathVariable Integer companyId,
+                                                                      @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaimAsString("preferred_username");
+        return ResponseEntity.ok(service.findActiveByCompanyId(companyId, username));
+    }
+    
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(
+            @RequestBody Map<String, String> request,
+            @AuthenticationPrincipal Jwt jwt) {
+
+        String currentUsername = jwt.getClaimAsString("preferred_username");
+        String targetUsername = request.get("username");   // username yang mau diganti passwordnya
+        String newPassword = request.get("newPassword");
+
+        if (newPassword == null || newPassword.isBlank()) {
+            return ResponseEntity.badRequest().body("Password tidak boleh kosong");
+        }
+
+        // Opsional: batasi hanya boleh ganti password diri sendiri, 
+        // atau admin boleh ganti password user lain
+        if (!currentUsername.equals(targetUsername) 
+                && !userPermissionService.isGlobalSuperAdmin(currentUsername)) {
+            return ResponseEntity.status(403).body("Tidak punya hak untuk mengganti password user lain");
+        }
+
+        service.changePassword(targetUsername, newPassword, currentUsername);
+        return ResponseEntity.ok("Password berhasil diubah");
+    }
+}

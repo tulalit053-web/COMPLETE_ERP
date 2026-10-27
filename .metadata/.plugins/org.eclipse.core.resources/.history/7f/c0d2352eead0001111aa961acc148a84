@@ -1,0 +1,107 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.UserApplication;
+import com.erp.system.repository.UserApplicationRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@Transactional
+public class UserApplicationService {
+
+    private final UserApplicationRepository repository;
+    private final UserPermissionService userPermissionService;
+
+    public UserApplicationService(UserApplicationRepository repository,
+                                  UserPermissionService userPermissionService) {
+        this.repository = repository;
+        this.userPermissionService = userPermissionService;
+    }
+
+    public List<UserApplication> findAll(String username) {
+        if (userPermissionService.isGlobalSuperAdmin(username)) {
+            return repository.findAll();
+        } else {
+            Integer companyId = userPermissionService.getCurrentUserCompanyId(username);
+            return repository.findByCompanyId(companyId);
+        }
+    }
+
+    public UserApplication findById(Integer id, String username) {
+        UserApplication user = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            Integer companyId = userPermissionService.getCurrentUserCompanyId(username);
+            if (!companyId.equals(user.getCompanyId())) {
+                throw new RuntimeException("Access denied to this user");
+            }
+        }
+        return user;
+    }
+
+    public UserApplication findByUsername(String targetUsername, String currentUsername) {
+        UserApplication user = repository.findByUsername(targetUsername)
+                .orElseThrow(() -> new RuntimeException("User not found: " + targetUsername));
+
+        if (!userPermissionService.isGlobalSuperAdmin(currentUsername)) {
+            Integer companyId = userPermissionService.getCurrentUserCompanyId(currentUsername);
+            if (!companyId.equals(user.getCompanyId())) {
+                throw new RuntimeException("Access denied to this user");
+            }
+        }
+        return user;
+    }
+
+    public List<UserApplication> findByCompanyId(Integer companyId, String username) {
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            Integer userCompanyId = userPermissionService.getCurrentUserCompanyId(username);
+            if (!userCompanyId.equals(companyId)) {
+                throw new RuntimeException("Access denied to this company");
+            }
+        }
+        return repository.findByCompanyId(companyId);
+    }
+
+    @Transactional
+    public UserApplication create(UserApplication userApp, String username) {
+        if (!userPermissionService.isGlobalSuperAdmin(username)) {
+            Integer companyId = userPermissionService.getCurrentUserCompanyId(username);
+            if (!companyId.equals(userApp.getCompanyId())) {
+                throw new RuntimeException("You can only create user in your own company");
+            }
+        }
+
+        if (repository.existsByUsername(userApp.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        userApp.setCreatedDatetime(LocalDateTime.now());
+        userApp.setIsActive(1);
+        return repository.save(userApp);
+    }
+
+    @Transactional
+    public UserApplication update(Integer id, UserApplication userDetails, String username) {
+        UserApplication existing = findById(id, username); // sudah cek hak akses
+
+        existing.setName(userDetails.getName());
+        existing.setEmail(userDetails.getEmail());
+        existing.setMobilePhone(userDetails.getMobilePhone());
+        existing.setIsActive(userDetails.getIsActive());
+        existing.setRoleId(userDetails.getRoleId());
+        existing.setModifiedDatetime(LocalDateTime.now());
+        existing.setModifiedBy(userDetails.getModifiedBy());
+
+        return repository.save(existing);
+    }
+
+    @Transactional
+    public void delete(Integer id, String username) {
+        UserApplication existing = findById(id, username);
+        repository.delete(existing);
+    }
+}

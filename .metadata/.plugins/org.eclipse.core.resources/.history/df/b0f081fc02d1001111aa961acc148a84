@@ -1,0 +1,74 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.Menu;
+import com.erp.system.repository.MenuRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class MenuService {
+
+    private final MenuRepository menuRepository;
+
+    public MenuService(MenuRepository menuRepository) {
+        this.menuRepository = menuRepository;
+    }
+
+    public List<Menu> findAll() {
+        return menuRepository.findAll();
+    }
+
+    public Menu findById(Integer id) {
+        return menuRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu not found with id: " + id));
+    }
+
+    public List<Menu> findByModuleId(Integer moduleId) {
+        return menuRepository.findByModuleId(moduleId);
+    }
+
+    public List<Menu> findRootMenus() {
+        return menuRepository.findByParentMenuIdIsNull();
+    }
+
+    public List<Menu> findByParentId(Integer parentId) {
+        return menuRepository.findByParentMenuId(parentId);
+    }
+
+    @Transactional
+    public Menu create(Menu menu) {
+        menu.setCreatedDatetime(LocalDateTime.now());
+        if (menu.getIsActive() == null) {
+            menu.setIsActive(1);
+        }
+        return menuRepository.save(menu);
+    }
+
+    @Transactional
+    public Menu update(Integer id, Menu menu) {
+        Menu existing = findById(id);
+        existing.setParentMenuId(menu.getParentMenuId());
+        existing.setMenuCode(menu.getMenuCode());
+        existing.setMenuName(menu.getMenuName());
+        existing.setMenuLink(menu.getMenuLink());
+        existing.setMenuIndex(menu.getMenuIndex());
+        existing.setIsActive(menu.getIsActive());
+        existing.setIconName(menu.getIconName());
+        existing.setModuleId(menu.getModuleId());
+        existing.setShowInSidemenu(menu.getShowInSidemenu());
+        existing.setCompanyCode(menu.getCompanyCode());
+        existing.setCurrencyCode(menu.getCurrencyCode());
+        existing.setModifiedDatetime(LocalDateTime.now());
+        existing.setModifiedBy(menu.getModifiedBy());
+        return menuRepository.save(existing);
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+        Menu existing = findById(id);
+        menuRepository.delete(existing);
+    }
+}

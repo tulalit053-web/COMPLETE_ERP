@@ -1,0 +1,67 @@
+package com.erp.system.service;
+
+import com.erp.system.entity.Role;
+import com.erp.system.repository.RoleRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class RoleService {
+
+    private final RoleRepository roleRepository;
+
+    public RoleService(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
+
+    public List<Role> findAll() {
+        return roleRepository.findAll();
+    }
+
+    public Role findById(Integer id) {
+        return roleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Role not found with id: " + id));
+    }
+
+    public List<Role> findActiveRoles() {
+        return roleRepository.findByIsActive(1);
+    }
+
+    @Transactional
+    public Role create(Role role) {
+        role.setCreatedDatetime(LocalDateTime.now());
+        if (role.getIsActive() == null) {
+            role.setIsActive(1);
+        }
+        return roleRepository.save(role);
+    }
+
+    @Transactional
+    public Role update(Integer id, Role role) {
+        Role existing = findById(id);
+        existing.setRoleName(role.getRoleName());
+        existing.setIsActive(role.getIsActive());
+        existing.setCompanyCode(role.getCompanyCode());
+        existing.setCurrencyCode(role.getCurrencyCode());
+        existing.setModifiedDatetime(LocalDateTime.now());
+        existing.setModifiedBy(role.getModifiedBy());
+        return roleRepository.save(existing);
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+        Role existing = findById(id);
+        roleRepository.delete(existing);
+    }
+    
+    public List<Role> findByCompanyId(Integer companyId) {
+        return roleRepository.findByCompanyId(companyId);
+    }
+
+    public List<Role> findActiveByCompanyId(Integer companyId) {
+        return roleRepository.findByCompanyIdAndIsActive(companyId, 1);
+    }
+}

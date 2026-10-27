@@ -1,0 +1,22 @@
+package com.erp.system.repository;
+
+import com.erp.system.entity.RoleMenu;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface RoleMenuRepository extends JpaRepository<RoleMenu, Integer> {
+
+    List<RoleMenu> findByRoleId(Integer roleId);
+
+    List<RoleMenu> findByMenuId(Integer menuId);
+
+    Optional<RoleMenu> findByRoleIdAndMenuId(Integer roleId, Integer menuId);
+
+    void deleteByRoleId(Integer roleId);
+    
+  
+}

@@ -1,0 +1,105 @@
+package com.erp.system.service;
+
+import com.erp.system.dto.UserPermissionDto;
+import com.erp.system.entity.Menu;
+import com.erp.system.entity.Role;
+import com.erp.system.entity.RoleMenu;
+import com.erp.system.entity.UserApplication;
+import com.erp.system.repository.MenuRepository;
+import com.erp.system.repository.RoleMenuRepository;
+import com.erp.system.repository.RoleRepository;
+import com.erp.system.repository.UserApplicationRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class UserPermissionService {
+
+    private final UserApplicationRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final RoleMenuRepository roleMenuRepository;
+    private final MenuRepository menuRepository;
+
+    public UserPermissionService(UserApplicationRepository userRepository,
+                                 RoleRepository roleRepository,
+                                 RoleMenuRepository roleMenuRepository,
+                                 MenuRepository menuRepository) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.roleMenuRepository = roleMenuRepository;
+        this.menuRepository = menuRepository;
+    }
+
+    public UserPermissionDto getPermissionByUsername(String username) {
+        // 1. Ambil user dari database
+        UserApplication user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan di database: " + username));
+
+        // 2. Ambil Role
+        Role role = null;
+        if (user.getRoleId() != null) {
+            role = roleRepository.findById(user.getRoleId()).orElse(null);
+        }
+
+        // 3. Ambil RoleMenu (permission)
+        List<RoleMenu> roleMenus = new ArrayList<>();
+        if (user.getRoleId() != null) {
+            roleMenus = roleMenuRepository.findByRoleId(user.getRoleId());
+        }
+
+        // 4. Susun DTO
+        UserPermissionDto dto = new UserPermissionDto();
+        dto.setUserId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setName(user.getName());
+        dto.setCompanyId(user.getCompanyId());
+        dto.setCompany(user.getCompany());
+        dto.setRoleId(user.getRoleId());
+        dto.setRoleName(role != null ? role.getRoleName() : null);
+
+        List<UserPermissionDto.MenuPermission> permissions = new ArrayList<>();
+        for (RoleMenu rm : roleMenus) {
+            Menu menu = menuRepository.findById(rm.getMenuId()).orElse(null);
+
+            UserPermissionDto.MenuPermission mp = new UserPermissionDto.MenuPermission();
+            mp.setMenuId(rm.getMenuId());
+            mp.setMenuCode(menu != null ? menu.getMenuCode() : null);
+            mp.setMenuName(menu != null ? menu.getMenuName() : null);
+            mp.setIsView(rm.getIsView());
+            mp.setIsAdd(rm.getIsAdd());
+            mp.setIsEdit(rm.getIsEdit());
+            mp.setIsDelete(rm.getIsDelete());
+            mp.setIsApprove(rm.getIsApprove());
+
+            permissions.add(mp);
+        }
+        dto.setPermissions(permissions);
+
+        return dto;
+    }
+    
+    
+    public boolean hasPermission(String username, String menuCode, String action) {
+        try {
+            UserPermissionDto dto = getPermissionByUsername(username);
+            if (dto.getPermissions() == null) return false;
+
+            return dto.getPermissions().stream()
+                    .filter(p -> menuCode.equals(p.getMenuCode()))
+                    .anyMatch(p -> {
+                        return switch (action) {
+                            case "VIEW"    -> p.getIsView() != null && p.getIsView() == 1;
+                            case "ADD"     -> p.getIsAdd() != null && p.getIsAdd() == 1;
+                            case "EDIT"    -> p.getIsEdit() != null && p.getIsEdit() == 1;
+                            case "DELETE"  -> p.getIsDelete() != null && p.getIsDelete() == 1;
+                            case "APPROVE" -> p.getIsApprove() != null && p.getIsApprove() == 1;
+                            default -> false;
+                        };
+                    });
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}

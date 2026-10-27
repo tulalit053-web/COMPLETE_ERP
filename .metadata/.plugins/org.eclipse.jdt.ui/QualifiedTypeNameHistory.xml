@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-    <fullyQualifiedTypeName name="com.erp.system.repository.CrmLeadSourceRepository"/>
     <fullyQualifiedTypeName name="com.erp.system.entity.ResUsers"/>
     <fullyQualifiedTypeName name="com.erp.system.entity.CrmLeadSource"/>
     <fullyQualifiedTypeName name="jakarta.persistence.Entity"/>
@@ -60,4 +59,5 @@
     <fullyQualifiedTypeName name="com.erp.system.service.UserPermissionService"/>
     <fullyQualifiedTypeName name="com.erp.system.dto.UserPermissionDto"/>
     <fullyQualifiedTypeName name="com.erp.system.annotation.RequirePermission"/>
+    <fullyQualifiedTypeName name="java.util.Arrays"/>
 </qualifiedTypeNameHistroy>

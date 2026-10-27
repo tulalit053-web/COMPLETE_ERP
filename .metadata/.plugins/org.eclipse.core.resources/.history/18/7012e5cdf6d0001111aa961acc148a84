@@ -1,0 +1,55 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.RoleMenu;
+import com.erp.system.service.RoleMenuService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/role-menus")
+public class RoleMenuController {
+
+    private final RoleMenuService roleMenuService;
+
+    public RoleMenuController(RoleMenuService roleMenuService) {
+        this.roleMenuService = roleMenuService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<RoleMenu>> getAll() {
+        return ResponseEntity.ok(roleMenuService.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RoleMenu> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(roleMenuService.findById(id));
+    }
+
+    @GetMapping("/role/{roleId}")
+    public ResponseEntity<List<RoleMenu>> getByRoleId(@PathVariable Integer roleId) {
+        return ResponseEntity.ok(roleMenuService.findByRoleId(roleId));
+    }
+
+    @GetMapping("/menu/{menuId}")
+    public ResponseEntity<List<RoleMenu>> getByMenuId(@PathVariable Integer menuId) {
+        return ResponseEntity.ok(roleMenuService.findByMenuId(menuId));
+    }
+
+    @PostMapping
+    public ResponseEntity<RoleMenu> create(@RequestBody RoleMenu roleMenu) {
+        return ResponseEntity.ok(roleMenuService.create(roleMenu));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RoleMenu> update(@PathVariable Integer id, @RequestBody RoleMenu roleMenu) {
+        return ResponseEntity.ok(roleMenuService.update(id, roleMenu));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        roleMenuService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}

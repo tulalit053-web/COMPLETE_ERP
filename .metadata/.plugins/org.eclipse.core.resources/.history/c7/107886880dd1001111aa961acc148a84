@@ -1,0 +1,20 @@
+package com.erp.system.repository;
+
+import com.erp.system.entity.CompanyApplication;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface CompanyApplicationRepository extends JpaRepository<CompanyApplication, Integer> {
+
+    List<CompanyApplication> findByCompanyId(Integer companyId);
+
+    List<CompanyApplication> findByCompanyIdAndIsActiveTrue(Integer companyId);
+
+    Optional<CompanyApplication> findByCompanyIdAndApplicationId(Integer companyId, Integer applicationId);
+
+    boolean existsByCompanyIdAndApplicationId(Integer companyId, Integer applicationId);
+}

@@ -1,0 +1,114 @@
+package com.erp.system.interceptor;
+
+import com.erp.system.entity.Menu;
+import com.erp.system.repository.MenuRepository;
+import com.erp.system.service.UserPermissionService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.io.IOException;
+
+@Component
+public class PermissionInterceptor implements HandlerInterceptor {
+
+    private final MenuRepository menuRepository;
+    private final UserPermissionService userPermissionService;
+
+    public PermissionInterceptor(MenuRepository menuRepository,
+                                 UserPermissionService userPermissionService) {
+        this.menuRepository = menuRepository;
+        this.userPermissionService = userPermissionService;
+    }
+
+    @Override
+    public boolean preHandle(HttpServletRequest request,
+                             HttpServletResponse response,
+                             Object handler) throws Exception {
+
+        String path = normalizePath(request.getRequestURI());
+        String method = request.getMethod();
+
+        // Skip path yang tidak perlu dicek
+        if (shouldSkip(path)) {
+            return true;
+        }
+
+        // Ambil JWT
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt jwt)) {
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return false;
+        }
+
+        String username = jwt.getClaimAsString("preferred_username");
+
+        // Cari menu berdasarkan menu_link
+        Menu menu = menuRepository.findByMenuLink(path).orElse(null);
+
+        // Kalau menu tidak ditemukan, biarkan lewat
+        if (menu == null) {
+            return true;
+        }
+
+        // Tentukan action dari HTTP method
+        String action = mapMethodToAction(method);
+
+        // Cek permission
+        boolean allowed = userPermissionService.hasPermission(username, menu.getMenuCode(), action);
+
+        if (!allowed) {
+            String message = String.format(
+                "Access denied. User '%s' does not have %s permission on menu '%s'",
+                username, action, menu.getMenuCode()
+            );
+            sendError(response, HttpServletResponse.SC_FORBIDDEN, message);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean shouldSkip(String path) {
+        return path.contains("/me")
+                || path.contains("/actuator")
+                || path.contains("/public")
+                || path.contains("/error")
+                || path.contains("/swagger")
+                || path.contains("/v3/api-docs");
+    }
+
+    private String normalizePath(String path) {
+        if (path == null) return "";
+        // Hilangkan trailing slash
+        if (path.length() > 1 && path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        return path;
+    }
+
+    private String mapMethodToAction(String method) {
+        return switch (method.toUpperCase()) {
+            case "POST"   -> "ADD";
+            case "PUT", "PATCH" -> "EDIT";
+            case "DELETE" -> "DELETE";
+            default       -> "VIEW";
+        };
+    }
+
+    private void sendError(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write("""
+            {
+              "status": %d,
+              "error": "%s",
+              "message": "%s"
+            }
+            """.formatted(status, status == 403 ? "Forbidden" : "Unauthorized", message));
+    }
+}

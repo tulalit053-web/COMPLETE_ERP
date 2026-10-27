@@ -1,0 +1,50 @@
+package com.erp.system.controller;
+
+import com.erp.system.entity.Company;
+import com.erp.system.service.CompanyService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/companies")
+public class CompanyController {
+
+    @Autowired
+    private CompanyService companyService;
+
+    @GetMapping
+    public List<Company> getAllCompanies() {
+        return companyService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Company> getCompanyById(@PathVariable Integer id) {
+        return companyService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public Company createCompany(@RequestBody Company company) {
+        return companyService.save(company);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Company> updateCompany(@PathVariable Integer id, @RequestBody Company companyDetails) {
+        try {
+            Company updatedCompany = companyService.update(id, companyDetails);
+            return ResponseEntity.ok(updatedCompany);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCompany(@PathVariable Integer id) {
+        companyService.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+}
