@@ -1,0 +1,7 @@
+1. HttpOnly Cookie - untuk menyimpan token dan kebal dari serangan XSS
+
+2. File Konfigurasi Terpusat (.env dan config.ts) -- untuk konfigurasi IP:PORT
+
+3. src/lib/api-client.ts -- berkomunikasi dengan API Gateway dari sisi server Next.js secara aman dan bersih
+
+4. otp encrypt pakai BCrypt - hashing satu arah (one-way hashing) kalau otp sama hasil encrypt tidak akan sama  

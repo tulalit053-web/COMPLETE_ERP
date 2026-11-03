@@ -1,5 +1,0 @@
-package com.erp.system.dto;
-
-public class UserPermissionDto {
-
-}

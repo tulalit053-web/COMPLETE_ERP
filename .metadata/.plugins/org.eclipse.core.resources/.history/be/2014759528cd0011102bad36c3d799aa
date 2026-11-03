@@ -1,5 +1,0 @@
-package com.erp.gateway.config;
-
-public class SecurityConfig {
-
-}

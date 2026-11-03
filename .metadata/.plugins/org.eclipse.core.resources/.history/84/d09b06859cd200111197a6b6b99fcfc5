@@ -1,0 +1,63 @@
+server:
+  port: 8084
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/erp-realm
+          jwk-set-uri: http://localhost:8180/realms/erp-realm/protocol/openid-connect/certs
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: erp-admins-service
+          uri: lb://erp-admins-service
+          predicates:
+            - Path=/api/admins/**
+          filters:
+            - StripPrefix=2
+        - id: erp-crm-service
+          uri: lb://erp-crm-service
+          predicates:
+            - Path=/api/crm/**
+          filters:
+            - StripPrefix=2
+        - id: erp-hrd-service
+          uri: lb://erp-hrd-service
+          predicates:
+            - Path=/api/hrd/**
+          filters:
+            - StripPrefix=2
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: erp-gateway
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

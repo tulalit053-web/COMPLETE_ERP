@@ -1,0 +1,99 @@
+
+package com.erp.gateway.config;
+
+import java.util.List;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+@Configuration
+@EnableWebFluxSecurity
+public class SecurityConfig {
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration config = new CorsConfiguration();
+
+        // Origin frontend Next.js
+        config.setAllowedOrigins(
+            List.of("http://localhost:3000")
+        );
+
+        // HTTP methods yang diizinkan
+        config.setAllowedMethods(
+            List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
+            )
+        );
+
+        // Header yang digunakan oleh Next.js
+        config.setAllowedHeaders(
+            List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin"
+            )
+        );
+
+        // Tidak menggunakan cookie lintas origin
+        config.setAllowCredentials(false);
+
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", config);
+
+        return source;
+    }
+
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(
+            ServerHttpSecurity http) {
+
+        http
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
+
+            // CORS harus diproses sebelum autentikasi
+            .cors(cors ->
+                cors.configurationSource(corsConfigurationSource())
+            )
+
+            .authorizeExchange(exchanges -> exchanges
+
+                // Preflight tidak membutuhkan access token
+                .pathMatchers(
+                    HttpMethod.OPTIONS,
+                    "/**"
+                ).permitAll()
+
+                // Endpoint monitoring
+                .pathMatchers("/actuator/**").permitAll()
+
+                // Endpoint lainnya tetap memerlukan token
+                .anyExchange().authenticated()
+            )
+
+            // Validasi JWT Keycloak untuk request API
+            .oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(jwt -> {})
+            );
+
+        return http.build();
+    }
+}

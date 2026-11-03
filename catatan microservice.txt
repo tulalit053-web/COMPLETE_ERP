@@ -2,9 +2,20 @@ keycloak - http://localhost:8180 - admin/admin pakai docker
 
 mvn clean package -DskipTests
 
+pg_dump -U nama_user -d nama_database -f C:\lokasi_penyimpanan\backup.sql
+
 git add .
 git commit -m "feat: tambah service baru dan revisi entity"
 git push origin main
+
+*** buat project next.js***
+================================
+1. buat folder 
+2. npx create-next-app@latest erp-admin-web
+3. cd erp-admin-web
+4. npx shadcn@latest init
+5. npx shadcn@latest add button input card label table dialog badge dropdown-menu sheet separator avatar
+6. npm run dev
 
 
 Company

@@ -1,0 +1,5 @@
+package CorsConfig;
+
+public class CorsConfig {
+
+}
