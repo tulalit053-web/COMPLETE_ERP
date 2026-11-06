@@ -1,0 +1,77 @@
+
+package com.erp.system.controller;
+
+import com.erp.system.dto.OtpRequest;
+import com.erp.system.service.UserApplicationService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:3000")
+public class AuthController {
+
+    @Autowired
+    private UserApplicationService userApplicationService;
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<Map<String, Object>> verifyOtp(
+            @RequestBody OtpRequest request,
+            HttpServletRequest httpRequest) {
+
+        // Mengambil IP Address
+        String ipAddress = httpRequest.getRemoteAddr();
+
+        // Mengambil User Agent
+        String userAgent = httpRequest.getHeader("User-Agent");
+
+        // Memanggil service untuk verifikasi OTP
+        String status = userApplicationService.verifyOtp(
+                request.getUsername(),
+                ipAddress,
+                userAgent,
+                request.getDeviceId(),
+                request.getOtp()
+        );
+
+        // Membentuk response JSON
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("status", status);
+
+        if ("SUCCESS".equals(status)) {
+
+            response.put(
+                "message",
+                "Verifikasi OTP berhasil."
+            );
+
+            return ResponseEntity.ok(response);
+
+        } else if (
+                "MAX_ATTEMPT_REACHED".equals(status)
+                || "USER_LOCKED".equals(status)) {
+
+            response.put("error", status);
+
+            return ResponseEntity
+                    .status(403)
+                    .body(response);
+
+        } else {
+
+            response.put("error", status);
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(response);
+        }
+    }
+}

@@ -1,0 +1,290 @@
+package com.erp.system.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import com.erp.system.util.AesCryptoConverter;
+
+import jakarta.persistence.Convert;
+
+@Entity
+@Table(name = "adm_mst_user_application", schema = "schema_admin")
+public class UserApplication {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "dmuapp_id")
+    private Integer id;
+
+    @Column(name = "dmuapp_role_id")
+    private Integer roleId;
+
+    @Column(name = "dmuapp_employee_code", length = 50)
+    private String employeeCode;
+
+    @Column(name = "dmuapp_name", nullable = false, length = 250)
+    private String name;
+
+    @Column(name = "dmuapp_username", nullable = false, unique = true, length = 250)
+    private String username;
+
+    @Convert(converter = AesCryptoConverter.class)
+    @Column(name = "dmuapp_email")
+    private String Email;
+
+    @Convert(converter = AesCryptoConverter.class)
+    @Column(name = "dmuapp_mobilephone")
+    private String Mobilephone;
+
+    @Convert(converter = AesCryptoConverter.class)
+    @Column(name = "dmuapp_nik") // Contoh jika ada Nomor Induk Kependudukan
+    private String Nik;
+
+    @Column(name = "dmuapp_is_active")
+    private Integer isActive;
+
+    @Column(name = "dmuapp_is_login")
+    private Integer isLogin;
+
+    @Column(name = "dmuapp_login_date")
+    private LocalDateTime loginDate;
+
+    @Column(name = "dmuapp_logout_date")
+    private LocalDateTime logoutDate;
+
+    @Column(name = "dmuapp_company_id")                 // ← kolom penting baru
+    private Integer companyId;
+
+    @Column(name = "dmuapp_company", length = 50)
+    private String company;
+
+    @Column(name = "dmuapp_currency", length = 50)
+    private String currency;
+
+    @Column(name = "dmuapp_regional", length = 50)
+    private String regional;
+
+    @Column(name = "dmuapp_branch", length = 50)
+    private String branch;
+
+    @Column(name = "dmuapp_subbranch", length = 50)
+    private String subBranch;
+
+    @Column(name = "dmuapp_password", length = 300)
+    private String password;
+
+    @Column(name = "dmuapp_last_change_pwd")
+    private LocalDateTime lastChangePwd;
+
+    @Column(name = "dmuapp_must_change_pwd")
+    private Boolean mustChangePwd;
+
+    @Column(name = "dmuapp_created_datetime")
+    private LocalDateTime createdDatetime;
+
+    @Column(name = "dmuapp_created_by", length = 100)
+    private String createdBy;
+
+    @Column(name = "dmuapp_modified_datetime")
+    private LocalDateTime modifiedDatetime;
+
+    @Column(name = "dmuapp_modified_by", length = 100)
+    private String modifiedBy;
+
+    // ===== Constructor =====
+    public UserApplication() {
+    }
+
+    // ===== Getter & Setter =====
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
+    }
+
+    public String getEmployeeCode() {
+        return employeeCode;
+    }
+
+    public void setEmployeeCode(String employeeCode) {
+        this.employeeCode = employeeCode;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMobilePhone() {
+        return mobilePhone;
+    }
+
+    public void setMobilePhone(String mobilePhone) {
+        this.mobilePhone = mobilePhone;
+    }
+
+    public Integer getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Integer isActive) {
+        this.isActive = isActive;
+    }
+
+    public Integer getIsLogin() {
+        return isLogin;
+    }
+
+    public void setIsLogin(Integer isLogin) {
+        this.isLogin = isLogin;
+    }
+
+    public LocalDateTime getLoginDate() {
+        return loginDate;
+    }
+
+    public void setLoginDate(LocalDateTime loginDate) {
+        this.loginDate = loginDate;
+    }
+
+    public LocalDateTime getLogoutDate() {
+        return logoutDate;
+    }
+
+    public void setLogoutDate(LocalDateTime logoutDate) {
+        this.logoutDate = logoutDate;
+    }
+
+    public Integer getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Integer companyId) {
+        this.companyId = companyId;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getRegional() {
+        return regional;
+    }
+
+    public void setRegional(String regional) {
+        this.regional = regional;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    public String getSubBranch() {
+        return subBranch;
+    }
+
+    public void setSubBranch(String subBranch) {
+        this.subBranch = subBranch;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public LocalDateTime getLastChangePwd() {
+        return lastChangePwd;
+    }
+
+    public void setLastChangePwd(LocalDateTime lastChangePwd) {
+        this.lastChangePwd = lastChangePwd;
+    }
+
+    public Boolean getMustChangePwd() {
+        return mustChangePwd;
+    }
+
+    public void setMustChangePwd(Boolean mustChangePwd) {
+        this.mustChangePwd = mustChangePwd;
+    }
+
+    public LocalDateTime getCreatedDatetime() {
+        return createdDatetime;
+    }
+
+    public void setCreatedDatetime(LocalDateTime createdDatetime) {
+        this.createdDatetime = createdDatetime;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getModifiedDatetime() {
+        return modifiedDatetime;
+    }
+
+    public void setModifiedDatetime(LocalDateTime modifiedDatetime) {
+        this.modifiedDatetime = modifiedDatetime;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+}

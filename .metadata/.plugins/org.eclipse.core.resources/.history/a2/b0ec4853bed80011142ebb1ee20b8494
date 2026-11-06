@@ -1,0 +1,14 @@
+package com.erp.system.repository;
+
+import com.erp.system.entity.UserOtp;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserOtpRepository extends JpaRepository<UserOtp, Integer> {
+    // Mencari OTP terakhir yang di-generate berdasarkan username, device, dan status
+    Optional<UserOtp> findTopByUsernameAndDeviceIdAndStatusOrderByCreatedDatetimeDesc(
+            String username, String deviceId, String status);
+}

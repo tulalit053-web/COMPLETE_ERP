@@ -1,0 +1,34 @@
+package com.erp.system.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "adm_otp", schema = "schema_admin")
+public class UserOtp {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "otp_id")
+    private Integer otpId;
+
+    @Column(name = "username")
+    private String username;
+
+    @Column(name = "device_id")
+    private String deviceId;
+
+    @Column(name = "otp_code")
+    private String otpCode;
+
+    @Column(name = "created_datetime")
+    private LocalDateTime createdDatetime;
+
+    @Column(name = "expired_datetime")
+    private LocalDateTime expiredDatetime;
+
+    @Column(name = "status")
+    private String status; // PENDING, VERIFIED, EXPIRED
+}

@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: erp-admins-service
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: email.erp.tulalit053@gmail.com
+    password: sandi_aplikasi_16_digit_anda # Gunakan "App Password" dari Google Account, BUKAN sandi login Gmail!
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

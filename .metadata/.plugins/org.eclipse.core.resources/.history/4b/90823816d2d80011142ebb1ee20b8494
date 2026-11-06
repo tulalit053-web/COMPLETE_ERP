@@ -1,0 +1,57 @@
+package com.erp.system.controller;
+
+import com.erp.system.dto.OtpRequest;
+import com.erp.system.service.UserApplicationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:3000") // Mengizinkan akses dari Next.js lokal Anda
+public class AuthController {
+
+    @Autowired
+    private UserApplicationService userApplicationService;
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity> verifyOtp(@RequestBody OtpRequest request, HttpServletRequest httpRequest) {
+        
+        // Menangkap IP Address dan User Agent dari request Next.js
+        String ipAddress = httpRequest.getRemoteAddr();
+        String userAgent = httpRequest.getHeader("User-Agent");
+
+        // Memanggil fungsi Service yang sudah kita buat sebelumnya
+        String status = userApplicationService.verifyOtp(
+                request.getUsername(), 
+                ipAddress, 
+                userAgent, 
+                request.getDeviceId(), 
+                request.getOtp()
+        );
+
+        // Membentuk format JSON balasan (Response) ke Next.js
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", status);
+
+        if ("SUCCESS".equals(status)) {
+            // Nanti di sini kita bisa menyisipkan Token JWT dari Keycloak
+            response.put("message", "Verifikasi OTP berhasil.");
+            return ResponseEntity.ok(response);
+            
+        } else if ("MAX_ATTEMPT_REACHED".equals(status) || "USER_LOCKED".equals(status)) {
+            // Jika akun terkunci, kirimkan status HTTP 403 Forbidden
+            response.put("error", status);
+            return ResponseEntity.status(403).body(response);
+            
+        } else {
+            // Jika OTP salah / expired (HTTP 400 Bad Request)
+            response.put("error", status);
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+}

@@ -4,4 +4,31 @@
 
 3. src/lib/api-client.ts -- berkomunikasi dengan API Gateway dari sisi server Next.js secara aman dan bersih
 
-4. otp encrypt pakai BCrypt - hashing satu arah (one-way hashing) kalau otp sama hasil encrypt tidak akan sama  
+4. otp encrypt pakai BCrypt - hashing satu arah (one-way hashing) kalau otp sama hasil encrypt tidak akan sama 
+
+5. @Convert(converter = AesEncryptor.class)
+    @Column(name = "no_handphone")
+    private String noHandphone;
+
+    @Convert(converter = AesEncryptor.class)
+    @Column(name = "alamat_lengkap")
+    private String alamatLengkap; 
+
+6. 2. Tahap Development (Mengatur Kunci di Spring Tool Suite)
+Karena Anda menjalankan Spring Boot dari STS, aplikasi tidak berjalan di Docker saat ini. STS butuh diberi tahu apa isi AES_SECRET_KEY.
+
+Di STS, klik kanan pada proyek erp-admins-service.
+
+Pilih Run As > Run Configurations...
+
+Di panel sebelah kiri, pastikan aplikasi Spring Boot Anda terpilih.
+
+Pindah ke tab Environment di panel sebelah kanan.
+
+Klik tombol New...
+
+Pada kolom Name, ketik tepat: AES_SECRET_KEY
+
+Pada kolom Value, ketik 32 karakter: OjkErpSystemSecretKey256Bits2026
+
+Klik OK, lalu Apply, dan Run. Spring Boot kini siap mengenkripsi data.

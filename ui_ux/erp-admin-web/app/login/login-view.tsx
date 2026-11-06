@@ -14,6 +14,7 @@ interface LoginViewProps {
   onPasswordChange: (value: string) => void;
   onOtpChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  onCancel: () => void; // Tambahan fungsi pembatalan
 }
 
 export default function LoginView({
@@ -27,6 +28,7 @@ export default function LoginView({
   onPasswordChange,
   onOtpChange,
   onSubmit,
+  onCancel, // Tangkap dari props
 }: LoginViewProps) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -84,9 +86,27 @@ export default function LoginView({
             
             {error && <p className="text-sm text-red-500">{error}</p>}
             
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Memproses..." : (isOtpMode ? "Verifikasi OTP" : "Masuk")}
-            </Button>
+            {/* AREA TOMBOL YANG DIMODIFIKASI */}
+            {!isOtpMode ? (
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Memproses..." : "Masuk"}
+              </Button>
+            ) : (
+              <div className="flex space-x-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-1/2" 
+                  onClick={onCancel}
+                  disabled={loading}
+                >
+                  Batal
+                </Button>
+                <Button type="submit" className="w-1/2" disabled={loading}>
+                  {loading ? "Memproses..." : "Verifikasi OTP"}
+                </Button>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
