@@ -6,6 +6,7 @@
 	</section>
 	<section name="MavenProjectImportWizardPage">
 		<list key="rootDirectory">
+			<item value="D:\ERP\Miroservices\erp-promo-service"/>
 			<item value="D:\kerjaan2026\NewJfast\discovery-server"/>
 		</list>
 		<list key="projectNameTemplate">

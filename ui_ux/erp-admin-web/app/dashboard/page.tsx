@@ -1,38 +1,66 @@
-import { Suspense } from "react";
-import { fetchWithToken } from "@/lib/api-client";
-import { redirect } from "next/navigation";
+"use client";
 
-// Tambahkan ini agar Next.js tahu halaman ini boleh diblokir hingga data siap
-export const instant = false;
+import { useEffect, useState } from "react";
+import DashboardView from "./dashboard-view";
+import { AdminSessionContext, fetchPortalContext } from "./dashboard.service";
 
-async function UserProfile() {
-  const res = await fetchWithToken("/api/admins/me");
-  
-  if (res.status === 401) {
-    redirect("/login");
-  }
+const PROMO_WEB_URL =
+  process.env.NEXT_PUBLIC_PROMO_WEB_URL || "http://localhost:3001";
 
-  const userData = res.ok ? await res.json() : null;
+export default function DashboardPage() {
+  const [session, setSession] = useState<AdminSessionContext | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
 
-  if (!userData) {
-    return <p className="text-red-500">Gagal memuat profil pengguna.</p>;
-  }
+  const loadContext = async (targetUser?: string, companyId?: number | null) => {
+    setLoading(true);
+    setError("");
+    try {
+      const savedUser =
+        targetUser ||
+        localStorage.getItem("erp_active_username") ||
+        "budi.santoso";
+      localStorage.setItem("erp_active_username", savedUser);
+      const data = await fetchPortalContext(savedUser, companyId);
+      setSession(data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Gagal memuat konteks sesi"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadContext();
+  }, []);
+
+  const handleSwitchUser = (username: string) => {
+    setSelectedCompanyId(null);
+    loadContext(username, null);
+  };
+
+  const handleSwitchCompany = (companyId: number | null) => {
+    setSelectedCompanyId(companyId);
+    loadContext(session?.username, companyId);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("erp_active_username");
+    window.location.href = "/login";
+  };
 
   return (
-    <div className="p-4 bg-white rounded shadow">
-      <p><strong>Info User:</strong> {JSON.stringify(userData)}</p>
-    </div>
-  );
-}
-
-export default async function DashboardPage() {
-  return (
-    <div className="p-8 space-y-4">
-      <h1 className="text-2xl font-bold">Dashboard ERP</h1>
-      
-      <Suspense fallback={<p>Memuat profil pengguna...</p>}>
-        <UserProfile />
-      </Suspense>
-    </div>
+    <DashboardView
+      session={session}
+      loading={loading}
+      error={error}
+      promoWebUrl={PROMO_WEB_URL}
+      selectedCompanyId={selectedCompanyId}
+      onSwitchCompany={handleSwitchCompany}
+      onLogout={handleLogout}
+    />
   );
 }

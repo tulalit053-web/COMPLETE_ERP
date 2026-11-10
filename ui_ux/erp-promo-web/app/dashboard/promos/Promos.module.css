@@ -1,0 +1,210 @@
+.card {
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  all: unset;
+  cursor: pointer;
+  padding: 5px 11px;
+  border-radius: 99px;
+  font-size: 12px;
+  border: 1px solid #e6e8ee;
+  color: #6b7280;
+  background: #ffffff;
+}
+
+.chipOn {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
+.newBtn {
+  all: unset;
+  cursor: pointer;
+  padding: 7px 13px;
+  border-radius: 7px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.newBtn:hover {
+  background: #4338ca;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 11px 12px;
+  border-bottom: 1px solid #e6e8ee;
+  font-size: 13px;
+}
+
+.table th {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 12px;
+  background: #f9fafb;
+}
+
+.rowClick {
+  cursor: pointer;
+}
+
+.rowClick:hover td {
+  background: #fafbfc;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+}
+
+.tag {
+  font-size: 11.5px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: #f9fafb;
+  border: 1px solid #e6e8ee;
+  color: #6b7280;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: currentColor;
+}
+
+.pActive {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.pScheduled {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.pPending {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.pPaused {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.pExpired {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.barTrack {
+  height: 7px;
+  background: #f9fafb;
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid #e6e8ee;
+}
+
+.barFill {
+  height: 100%;
+  background: #4f46e5;
+  border-radius: 99px;
+}
+
+.barWarn {
+  background: #d97706;
+}
+
+.barBad {
+  background: #dc2626;
+}
+
+/* Modal Buat Promo */
+.modalBg {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.4);
+  display: grid;
+  place-items: center;
+  z-index: 35;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 22px;
+  width: 520px;
+  max-width: 94vw;
+  border: 1px solid #e6e8ee;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.field input,
+.field select {
+  border: 1px solid #e6e8ee;
+  border-radius: 7px;
+  padding: 7px 9px;
+  font: inherit;
+}

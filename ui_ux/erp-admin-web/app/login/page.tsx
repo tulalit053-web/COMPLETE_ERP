@@ -12,13 +12,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Fungsi untuk mengembalikan form ke halaman login awal
   const handleCancelOtp = () => {
     setIsOtpMode(false);
     setOtp("");
-    setPassword(""); 
+    setPassword("");
     setError("");
-    // Hapus token Keycloak sementara yang tersimpan dari tahap pertama (jika ada)
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
   };
@@ -36,37 +34,37 @@ export default function LoginPage() {
       }
 
       if (!isOtpMode) {
-        // Mode 1: Login Standar
         const res = await loginToKeycloak(username, password, deviceId);
-        
-        // Tangkap penolakan dari backend (misal: user_locked dilempar via error key)
+
         if (res.status === "USER_LOCKED" || res.error === "USER_LOCKED") {
-           throw new Error("USER_LOCKED");
+          throw new Error("USER_LOCKED");
         }
-        
+
         if (res.requireOtp) {
           setIsOtpMode(true);
         } else {
+          localStorage.setItem("erp_active_username", username);
           window.location.href = "/dashboard";
         }
       } else {
-        // Mode 2: Submit OTP ke BFF
-        await verifyOtp(username, otp, deviceId); // PASTIKAN username DIKIRIM KE VERIFY OTP
-        window.location.href = "/dashboard"; 
+        await verifyOtp(username, otp, deviceId);
+        localStorage.setItem("erp_active_username", username);
+        window.location.href = "/dashboard";
       }
-
     } catch (err) {
       const message = err instanceof Error ? err.message : "Terjadi kesalahan";
-      
-      // LOGIKA PENANGANAN STATUS KEAMANAN
+
       if (message.includes("USER_LOCKED")) {
-        alert("Akun Anda dikunci karena melebihi batas pengiriman OTP harian (5x). Silakan hubungi Admin.");
+        alert(
+          "Akun Anda dikunci karena melebihi batas pengiriman OTP harian (5x). Silakan hubungi Admin."
+        );
         handleCancelOtp();
       } else if (message.includes("MAX_ATTEMPT_REACHED")) {
-        alert("Anda telah salah memasukkan OTP 3 kali. Silakan login kembali dari awal.");
+        alert(
+          "Anda telah salah memasukkan OTP 3 kali. Silakan login kembali dari awal."
+        );
         handleCancelOtp();
       } else if (message.includes("INVALID_CODE")) {
-        // JIKA SALAH KODE, JANGAN BATALKAN (Biarkan mereka mencoba sampai attempt habis)
         setError("Kode OTP yang Anda masukkan salah.");
       } else if (message.includes("EXPIRED")) {
         setError("Kode OTP sudah kadaluarsa. Silakan batal dan login kembali.");

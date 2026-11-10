@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: erp-promo-service
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: email.erp.andlimhot@hotmail.com
+    password: B3g012!@ # Gunakan "App Password" dari Google Account, BUKAN sandi login Gmail!
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  whatsapp:
+  api:
+    url: ${WA_API_URL}
+    key: ${WA_API_KEY}
